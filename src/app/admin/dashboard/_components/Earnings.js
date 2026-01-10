@@ -71,7 +71,7 @@ const EarningSummary = ({ earningSummary, onYearChange }) => {
           <YAxis axisLine={false} tickLine={false} tickMargin={20} />
 
           <Tooltip
-            formatter={(value) => [`Monthly Earnings: ${value}`]}
+            formatter={(value) => [`Monthly Users: ${value}`]}
             contentStyle={{
               color: "var(--primary-green)",
               fontWeight: "500",

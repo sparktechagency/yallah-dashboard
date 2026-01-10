@@ -4,7 +4,7 @@ import { Button } from "antd";
 import { Bell } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import userAvatar from "@/assets/images/user-avatar-lg.png";
+import userAvatar from "@/assets/images/nouser.png";
 import { usePathname } from "next/navigation";
 import { Layout } from "antd";
 import { AlignJustify } from "lucide-react";

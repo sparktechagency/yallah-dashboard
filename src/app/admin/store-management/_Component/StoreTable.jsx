@@ -120,7 +120,7 @@ export default function StoreTable() {
           className="flex-center gap-x-2 !text-lg"
           onClick={() => setOpen(true)}
         >
-          Add Storec
+          Add Store
         </Button>
       </section>
       <Table
