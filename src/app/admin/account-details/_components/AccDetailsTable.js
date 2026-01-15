@@ -1,5 +1,4 @@
 "use client";
-
 import { Image, Input, Table } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
@@ -22,14 +21,17 @@ import Loader from "@/components/shared/Loader/Loader";
 export default function AccDetailsTable() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [searchCountry, setSearchCountry] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
 
   // ------------------get all teachers from api--------------------->
+  
   const { data: user, isLoading } = useGetAllusersQuery({
     limit: 10,
     page: currentPage,
     searchText,
+    searchCountry,
   });
 
   // change status api call
@@ -198,12 +200,18 @@ export default function AccDetailsTable() {
         },
       }}
     >
-      <div className="mb-3 ml-auto w-1/3 gap-x-5">
+      <div className="mb-3 ml-auto flex w-1/2 gap-x-5">
         <Input
           placeholder="Search by name or email"
           prefix={<Search className="mr-2 text-black" size={20} />}
           className="h-11 !rounded-lg !border !text-base"
           onChange={(e) => setSearchText(e.target.value)}
+        />
+        <Input
+          placeholder="Search by Country"
+          prefix={<Search className="mr-2 text-black" size={20} />}
+          className="h-11 !rounded-lg !border !text-base"
+          onChange={(e) => setSearchCountry(e.target.value)}
         />
       </div>
 

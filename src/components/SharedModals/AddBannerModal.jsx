@@ -1,52 +1,73 @@
 "use client";
 import { Button, Divider, Form, Modal } from "antd";
-
 import { RiCloseLargeLine } from "react-icons/ri";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import FormWrapper from "../Form/FormWrapper";
 import UUpload from "../Form/UUpload";
 import UInput from "../Form/UInput";
 import USelect from "../Form/USelect";
-import { useGetAllCouponsQuery } from "@/redux/api/couponApi";
-import { useState } from "react";
-import toast from "react-hot-toast";
 import { useAddBannerMutation } from "@/redux/api/bannerApi";
+import { useGetAllStoresQuery } from "@/redux/api/storeApi";
+import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
 
 const AddbannerModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
+
   const [searchText, setSearchText] = useState("");
-  // --------------get cupon api call--------------------------------
-  const { data, isLoading } = useGetAllCouponsQuery({
-    limit: 100,
+  const [selectedStore, setSelectedStore] = useState(null);
+
+  // ================= Store API =================
+  const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
+    limit: 1000000000,
     page: 1,
-    searchText: searchText,
+    searchText,
   });
 
-  // ----------------add banner api call---------------
+  // ================= Coupon API (Dependent) =================
+  const { data: couponData, isLoading: couponLoading } =
+    useGetCouponsByStoreIdQuery(
+      {
+        limit: 100,
+        page: 1,
+        searchText,
+        storeId: selectedStore,
+      },
+      {
+        skip: !selectedStore, // 🔒 skip until store selecte d
+      },
+    );
+
+  // ================= Add Banner API =================
   const [addBanner, { isLoading: isBannerLoading }] = useAddBannerMutation();
 
+  // ================= Submit =================
   const handleSubmit = async (values) => {
     try {
       const formData = new FormData();
+
       formData.append("payload", JSON.stringify(values));
+
       if (values.banner?.length > 0 && values.banner[0]?.originFileObj) {
-        console.log("Appending image:", values.banner[0].originFileObj);
         formData.append("image", values.banner[0].originFileObj);
       } else {
-        console.error("No valid image file found");
         toast.error("Please upload a valid image");
         return;
       }
+
       const res = await addBanner(formData).unwrap();
+
       if (res?.success) {
         toast.success(res?.message || "Banner added successfully");
         form.resetFields();
+        setSelectedStore(null);
         setOpen(false);
       }
     } catch (error) {
-      console.error("Error:", error);
       toast.error(error?.data?.message || "Failed to add banner");
     }
   };
+
   const onSearch = (value) => {
     setSearchText(value);
   };
@@ -58,12 +79,8 @@ const AddbannerModal = ({ open, setOpen }) => {
       centered
       onCancel={() => setOpen(false)}
       closeIcon={false}
-      style={{
-        minWidth: "max-content",
-        position: "relative",
-      }}
       width={800}
-      loading={isLoading}
+      style={{ position: "relative" }}
     >
       {/* Close Icon */}
       <div
@@ -80,52 +97,88 @@ const AddbannerModal = ({ open, setOpen }) => {
       <div className="pb-5">
         <h4 className="text-center text-2xl font-medium">Add Banner</h4>
         <Divider />
-        <div className="flex-1">
-          <FormWrapper form={form} onSubmit={handleSubmit}>
-            <UUpload
-              name="banner"
-              label="Banner"
-              placeholder={"Upload Banner"}
-              required={true}
-            />
-            <UInput
-              name="title"
-              label="Title"
-              required={true}
-              placeholder={"Enter Title"}
-            />
-            <UInput
-              name="subTitle"
-              label="Sub-Title"
-              required={true}
-              placeholder={"Enter Sub-Title"}
-            />
-            <USelect
-              name="coupon"
-              label="Coupon"
-              placeholder={"Select Coupon"}
-              options={data?.data?.data?.map((item) => ({
-                label: item.title,
-                value: item._id,
-              }))}
-              showSearch
-              optionFilterProp="children"
-              onSearch={onSearch}
-            />
-            <Button
-              htmlType="submit"
-              className="w-full"
-              size="large"
-              type="primary"
-              style={{
-                background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
-              }}
-              loading={isBannerLoading}
-            >
-              Save
-            </Button>
-          </FormWrapper>
-        </div>
+
+        <FormWrapper form={form} onSubmit={handleSubmit}>
+          {/* Banner Image */}
+          <UUpload
+            name="banner"
+            label="Banner"
+            placeholder="Upload Banner"
+            required
+          />
+
+          {/* Title */}
+          <UInput
+            name="title"
+            label="Title"
+            placeholder="Enter Title"
+            required
+          />
+
+          {/* Subtitle */}
+          <UInput
+            name="subTitle"
+            label="Sub-Title"
+            placeholder="Enter Sub-Title"
+            required
+          />
+
+          {/* Store Select */}
+          <USelect
+            name="store"
+            label="Store"
+            placeholder="Select Store"
+            loading={storeLoading}
+            options={storeData?.data?.data?.map((item) => ({
+              label: item.name,
+              value: item._id,
+            }))}
+            showSearch
+            optionFilterProp="children"
+            onSearch={onSearch}
+            onChange={(value) => {
+              setSelectedStore(value); // ✅ storeId set
+              form.setFieldsValue({ coupon: null }); // ✅ reset coupon
+            }}
+          />
+
+          {/* Coupon Select (Dependent) */}
+          <USelect
+            name="coupon"
+            label="Coupon"
+            placeholder={selectedStore ? "Select Coupon" : "Select Store First"}
+            loading={couponLoading}
+            disabled={!selectedStore} // 🔒 disabled until store selected
+            options={couponData?.data?.data?.map((item) => ({
+              label: item.title,
+              value: item._id,
+            }))}
+            showSearch
+            optionFilterProp="children"
+            onSearch={onSearch}
+          />
+
+          {/* Hint */}
+          {!selectedStore && (
+            <p className="mt-1 text-xs text-reda-400">
+              Please select a store to load coupons
+            </p>
+          )}
+
+          {/* Submit */}
+          <Button
+            htmlType="submit"
+            className="mt-4 w-full"
+            size="large"
+            type="primary"
+            loading={isBannerLoading}
+            style={{
+              background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
+            }}
+          >
+            Save
+          </Button>
+        </FormWrapper>
       </div>
     </Modal>
   );

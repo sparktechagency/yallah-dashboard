@@ -3,8 +3,9 @@ import { baseApi } from "./baseApi";
 const dashBoardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDashboardData: builder.query({
-      query: ({ currentYear }) => ({
-        url: `/summaries?year=${currentYear}`,
+      query: (params) => ({
+        url: "/summaries",
+        params, // year OR weekStartDate
         method: "GET",
       }),
     }),

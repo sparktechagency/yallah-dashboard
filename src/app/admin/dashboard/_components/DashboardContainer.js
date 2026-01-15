@@ -13,11 +13,13 @@ import { Skeleton } from "antd";
 export default function DashboardContainer() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const token = useSelector(selectToken);
-  // Fetch dashboard data, passing the currentYear
-  const { data, isLoading, isError } = useGetDashboardDataQuery(
-    { currentYear },
-    { skip: !token },
-  );
+  const [params, setParams] = useState({
+    year: new Date().getFullYear(),
+  });
+
+  const { data, isLoading, isError } = useGetDashboardDataQuery(params, {
+    skip: !token,
+  });
 
   // Dummy Data
   const userStats = [
@@ -120,7 +122,7 @@ export default function DashboardContainer() {
       <section className="flex-center-between flex-col gap-10 xl:flex-row">
         <EarningSummary
           earningSummary={data?.data?.userSummary || []}
-          onYearChange={handleYearChange}
+          onFilterChange={setParams}
         />
         <NewCuponeTable data={data?.data?.newCoupons || []} />
       </section>

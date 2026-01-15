@@ -3,23 +3,39 @@ import { Button, Divider, Form, Modal } from "antd";
 
 import { RiCloseLargeLine } from "react-icons/ri";
 
-import { useGetAllCouponsQuery } from "@/redux/api/couponApi";
+import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import UUpload from "@/components/Form/UUpload";
 import FormWrapper from "@/components/Form/FormWrapper";
 import USelect from "@/components/Form/USelect";
 import { useAddthumbnailsMutation } from "@/redux/api/thumbnailApi";
+import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 
 const AddThumbnailModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
-  // --------------get cupon api call--------------------------------
-  const { data, isLoading } = useGetAllCouponsQuery({
-    limit: 100,
+  const [selectedStore, setSelectedStore] = useState(null);
+
+  // ================= Store API =================
+  const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
+    limit: 1000000000,
     page: 1,
-    searchText: searchText,
+    searchText,
   });
+  // ================= Coupon API (Dependent) =================
+  const { data: couponData, isLoading: couponLoading } =
+    useGetCouponsByStoreIdQuery(
+      {
+        limit: 100,
+        page: 1,
+        searchText,
+        storeId: selectedStore,
+      },
+      {
+        skip: !selectedStore, // 🔒 skip until store selected
+      },
+    );
 
   // ----------------add banner api call---------------
   const [addThumbnail, { isLoading: isaddThumbnailLoading }] =
@@ -63,7 +79,7 @@ const AddThumbnailModal = ({ open, setOpen }) => {
         position: "relative",
       }}
       width={800}
-      loading={isLoading}
+      loading={couponLoading}
     >
       {/* Close Icon */}
       <div
@@ -88,11 +104,36 @@ const AddThumbnailModal = ({ open, setOpen }) => {
               placeholder={"Upload Thumbnail"}
               required={true}
             />
+
+            {/* Store Select */}
+            <USelect
+              name="store"
+              label="Store"
+              placeholder="Select Store"
+              loading={storeLoading}
+              options={storeData?.data?.data?.map((item) => ({
+                label: item.name,
+                value: item._id,
+              }))}
+              showSearch
+              optionFilterProp="children"
+              onSearch={onSearch}
+              onChange={(value) => {
+                setSelectedStore(value); // ✅ storeId set
+                form.setFieldsValue({ coupon: null }); // ✅ reset coupon
+              }}
+            />
+
+            {/* Coupon Select (Dependent) */}
             <USelect
               name="coupon"
               label="Coupon"
-              placeholder={"Select Coupon"}
-              options={data?.data?.data?.map((item) => ({
+              placeholder={
+                selectedStore ? "Select Coupon" : "Select Store First"
+              }
+              loading={couponLoading}
+              disabled={!selectedStore} // 🔒 disabled until store selected
+              options={couponData?.data?.data?.map((item) => ({
                 label: item.title,
                 value: item._id,
               }))}
@@ -100,6 +141,13 @@ const AddThumbnailModal = ({ open, setOpen }) => {
               optionFilterProp="children"
               onSearch={onSearch}
             />
+
+            {/* Hint */}
+            {!selectedStore && (
+              <p className="mt-1 text-xs text-gray-400">
+                Please select a store to load coupons
+              </p>
+            )}
             <Button
               htmlType="submit"
               className="w-full"

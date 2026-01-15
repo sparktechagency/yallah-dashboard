@@ -156,6 +156,7 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               : null,
             applicableUserType: couponData?.data?.applicableUserType,
             status: couponData?.data?.status,
+            type: couponData?.data?.type,
           }}
         >
           <USelect
@@ -171,20 +172,7 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             showSearch
             onSearch={(value) => setSearchText(value)}
           />
-          <USelect
-            type="text"
-            mode="multiple"
-            name="categories"
-            label="Category Name"
-            required={true}
-            placeholder="Enter category name"
-            options={categoriesData?.data?.data?.map((item) => ({
-              label: item?.name,
-              value: item?._id,
-            }))}
-            showSearch
-            onSearch={(value) => setCategoriesearchText(value)}
-          />
+
           <USelect
             type="text"
             name="countries"
@@ -217,6 +205,13 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             placeholder="Enter store link"
           />
           <UInput
+            type="text"
+            name="arabicLink"
+            label="Arabic Link (optional)"
+            required={true}
+            placeholder="Enter arabic store link"
+          />
+          <UInput
             type="number"
             name="fakeUses"
             label="Fake Uses"
@@ -244,13 +239,7 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             required={true}
             placeholder="Enter subtitle"
           />
-          <UInput
-            type="text"
-            name="discount"
-            label="Discount"
-            required={true}
-            placeholder="Enter discount"
-          />
+
           <h1>Validity Period</h1>
           <div className="grid grid-cols-2 gap-4">
             <UDatePicker

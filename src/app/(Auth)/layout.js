@@ -37,7 +37,7 @@ export default function AuthLayout({ children }) {
       style={{ backgroundImage: `url(${backgroundImage.src})` }}
     >
       {/* ✅ CORRECT AUDIO PATH */}
-      <audio ref={audioRef} src="/audio/themesong.mp3" loop preload="auto" />
+      {/* <audio ref={audioRef} src="/audio/themesong.mp3" loop preload="auto" /> */}
 
       <div className="flex w-1/3 items-center justify-center">{children}</div>
     </div>

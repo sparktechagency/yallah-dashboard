@@ -5,8 +5,10 @@ import UTextArea from "@/components/Form/UTextArea";
 import {
   useGetAllCouponsQuery,
   useGetCouponByIdQuery,
+  useGetCouponsByStoreIdQuery,
 } from "@/redux/api/couponApi";
 import { useSendPushNotificationMutation } from "@/redux/api/pushnotificationApi";
+import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { Button, Modal } from "antd";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
@@ -15,13 +17,28 @@ const PushNotificationModal = ({ open, setOpen }) => {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [couponId, setCouponId] = useState("");
+  const [selectedStore, setSelectedStore] = useState(null);
 
-  // Get all coupons
-  const { data: coupons, isLoading: couponsLoading } = useGetAllCouponsQuery({
-    limit: 100,
-    page: currentPage,
+  // ================= Store API =================
+  const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
+    limit: 1000000000,
+    page: 1,
     searchText,
   });
+
+  // ================= Coupon API (Dependent) =================
+  const { data: coupons, isLoading: couponsLoading } =
+    useGetCouponsByStoreIdQuery(
+      {
+        limit: 1000000000,
+        page: 1,
+        searchText,
+        storeId: selectedStore,
+      },
+      {
+        skip: !selectedStore, // 🔒 skip until store selected
+      },
+    );
 
   // Get single coupon details with refetch on arg change
   const {
@@ -32,6 +49,9 @@ const PushNotificationModal = ({ open, setOpen }) => {
     skip: !couponId,
     refetchOnMountOrArgChange: true, // 🔹 Ensure API hits on every change
   });
+  const onSearch = (value) => {
+    setSearchText(value);
+  };
 
   // add push notification
   const [addPushNotification, { isLoading }] =
@@ -82,6 +102,24 @@ const PushNotificationModal = ({ open, setOpen }) => {
           />
           <h1 className="text-center text-lg font-bold">Targeting Filters</h1>
 
+          {/* Store Select */}
+          <USelect
+            name="store"
+            label="Store"
+            placeholder="Select Store"
+            loading={storeLoading}
+            options={storeData?.data?.data?.map((item) => ({
+              label: item.name,
+              value: item._id,
+            }))}
+            showSearch
+            optionFilterProp="children"
+            onSearch={onSearch}
+            onChange={(value) => {
+              setSelectedStore(value); // ✅ storeId set
+              form.setFieldsValue({ coupon: null }); // ✅ reset coupon
+            }}
+          />
           <USelect
             label="Coupon"
             name="coupon"
@@ -95,10 +133,10 @@ const PushNotificationModal = ({ open, setOpen }) => {
           />
 
           <USelect
-            label="Region"
+            label="Country"
             name="countries"
             mode={"multiple"}
-            placeholder={"Select Region"}
+            placeholder={"Select Country"}
             required={true}
             options={
               singleCoupon?.data?.countries?.map((item) => ({

@@ -3,10 +3,22 @@ import { baseApi } from "./baseApi";
 const UserApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllusers: builder.query({
-      query: ({ limit, page, searchText }) => ({
-        url: `/users?limit=${limit}&page=${page}&searchTerm=${searchText}`,
-        method: "GET",
-      }),
+      query: ({ limit, page, searchText, searchCountry, createdAt }) => {
+        let url = `/users?limit=${limit}&page=${page}&searchTerm=${searchText}`;
+
+        if (searchCountry) {
+          url += `&country=${searchCountry}`;
+        }
+
+        if (createdAt) {
+          url += `&createdAt=${createdAt}`;
+        }
+
+        return {
+          url,
+          method: "GET",
+        };
+      },
       providesTags: ["user"],
     }),
     getUserById: builder.query({

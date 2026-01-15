@@ -1,13 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Modal, Button, Form, Input, Radio } from "antd";
+import { Modal, Button, Input } from "antd";
 import { Plus } from "lucide-react";
 import USelect from "@/components/Form/USelect";
 import UDatePicker from "@/components/Form/UDatePicker";
 import FormWrapper from "@/components/Form/FormWrapper";
 import { useAddCouponMutation } from "@/redux/api/couponApi";
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
-import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
-import countryList from "react-select-country-list"; // Import country list
+import countryList from "react-select-country-list";
 import toast from "react-hot-toast";
 import UInput from "@/components/Form/UInput";
 
@@ -77,7 +76,6 @@ export default function AddCuponeModal({ open, setOpen, onSubmit }) {
       terms: termsData,
       ...value,
     };
-
     try {
       const response = await addCupon(formData).unwrap();
       if (response?.success) {
@@ -147,6 +145,13 @@ export default function AddCuponeModal({ open, setOpen, onSubmit }) {
             label="Store Link"
             required={true}
             placeholder="Enter store link"
+          />
+          <UInput
+            type="text"
+            name="arabicLink"
+            label="Arabic Link (optional)"
+            required={true}
+            placeholder="Enter arabic store link"
           />
           <UInput
             type="number"

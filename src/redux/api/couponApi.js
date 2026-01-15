@@ -44,6 +44,15 @@ const CpuponApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["coupon"],
     }),
+
+    // get coupon by store id
+    getCouponsByStoreId: builder.query({
+      query: ({ limit, page, searchText, storeId }) => ({
+        url: `/coupons/${storeId}?limit=${limit}&page=${page}&searchTerm=${searchText}`,
+        method: "GET",
+      }),
+      providesTags: ["coupon"],
+    }),
   }),
 });
 export const {
@@ -52,4 +61,5 @@ export const {
   useDeleteCouponMutation,
   useUpdateCouponMutation,
   useGetCouponByIdQuery,
+  useGetCouponsByStoreIdQuery,
 } = CpuponApi;
