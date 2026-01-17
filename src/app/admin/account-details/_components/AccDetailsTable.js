@@ -1,5 +1,5 @@
 "use client";
-import { Image, Input, Table } from "antd";
+import { DatePicker, Image, Input, Table } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
 import { Search } from "lucide-react";
@@ -24,14 +24,16 @@ export default function AccDetailsTable() {
   const [searchCountry, setSearchCountry] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [createdAt, setCreatedAt] = useState(null);
 
   // ------------------get all teachers from api--------------------->
-  
+
   const { data: user, isLoading } = useGetAllusersQuery({
     limit: 10,
     page: currentPage,
     searchText,
     searchCountry,
+    createdAt,
   });
 
   // change status api call
@@ -212,6 +214,19 @@ export default function AccDetailsTable() {
           prefix={<Search className="mr-2 text-black" size={20} />}
           className="h-11 !rounded-lg !border !text-base"
           onChange={(e) => setSearchCountry(e.target.value)}
+        />
+
+        <DatePicker
+          className="h-11 w-full !rounded-lg"
+          placeholder="Filter by Date"
+          onChange={(date) => {
+            if (date) {
+              setCreatedAt(date.format("YYYY-MM-DD")); // 🔥 important
+            } else {
+              setCreatedAt(null);
+            }
+            setCurrentPage(1);
+          }}
         />
       </div>
 
