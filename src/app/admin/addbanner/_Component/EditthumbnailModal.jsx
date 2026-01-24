@@ -27,6 +27,7 @@ const EditthumbnailModal = ({ open, setOpen, selectedBanner }) => {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(values));
       formData.append("image", values.banner[0].originFileObj);
+      formData.append("arabicImage", values.arabicBanner[0].originFileObj);
       const res = await updateBanner({
         id: selectedBanner._id,
         formData,
@@ -106,12 +107,39 @@ const EditthumbnailModal = ({ open, setOpen, selectedBanner }) => {
                     },
                   ]
                 : [],
+              arabicBanner: selectedBanner?.arabicImage
+                ? [
+                    {
+                      uid: "-1",
+                      name: "arabicBanner",
+                      status: "done",
+                      url: selectedBanner.arabicImage,
+                    },
+                  ]
+                : [],
             }}
             layout="vertical"
           >
             <Form.Item
               name="banner"
               label="Banner"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              rules={[
+                { required: true, message: "Please upload a banner image" },
+              ]}
+            >
+              <Upload
+                listType="picture"
+                maxCount={1}
+                beforeUpload={() => false} // Prevent auto-upload
+              >
+                <Button icon={<UploadOutlined />}>Upload Banner</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item
+              name="arabicBanner"
+              label="Banner Arabic"
               valuePropName="fileList"
               getValueFromEvent={normFile}
               rules={[

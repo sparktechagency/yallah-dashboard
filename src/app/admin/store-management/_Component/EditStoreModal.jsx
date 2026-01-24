@@ -44,6 +44,16 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
         formData.append("thumbnail", values.thumbnail[0].originFileObj);
       }
 
+      if (values.arabicImage && values.arabicImage[0]?.originFileObj) {
+        formData.append("arabicImage", values.arabicImage[0].originFileObj);
+      }
+      if (values.arabicThumbnail && values.arabicThumbnail[0]?.originFileObj) {
+        formData.append(
+          "arabicThumbnail",
+          values.arabicThumbnail[0].originFileObj,
+        );
+      }
+
       const res = await updateStore({ id: storeData.id, formData }).unwrap();
 
       if (res?.success) {
@@ -99,13 +109,14 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
           <FormWrapper
             defaultValues={{
               name: storeData?.name,
+              arabicName: storeData?.arabicName,
               categories: storeData?.categories?.map((item) => item),
             }}
             onSubmit={handleSubmit}
           >
             <UUpload
               name="image"
-              label="Store Logo"
+              label="Store Logo (En)"
               placeholder={"Upload Store Logo"}
               required={false}
               defaultFileList={[
@@ -114,6 +125,20 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                   name: "image_logo",
                   status: "done",
                   url: storeData?.img,
+                },
+              ]}
+            />
+            <UUpload
+              name="arabicImage"
+              label="Store Logo (Ar)"
+              placeholder={"Upload Store Logo"}
+              required={false}
+              defaultFileList={[
+                {
+                  uid: "-1",
+                  name: "arabic_image_logo",
+                  status: "done",
+                  url: storeData?.arabicImage,
                 },
               ]}
             />
@@ -131,11 +156,32 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                 },
               ]}
             />
+            <UUpload
+              name="arabicThumbnail"
+              label="Store Thumbnail (Ar)"
+              required={false}
+              placeholder={"Upload Store Thumbnail"}
+              defaultFileList={[
+                {
+                  uid: "-1",
+                  name: "arabic_image_thumbnail",
+                  status: "done",
+                  url: storeData?.arabicThumbnail,
+                },
+              ]}
+            />
             <UInput
               name="name"
               label="Store Name"
               required={true}
               placeholder={"Enter Store Name"}
+            />
+            <UInput
+              name="arabicName"
+              label="اسم المتجر"
+              required={true}
+              placeholder="أدخل اسم المتجر"
+              dir="rtl"
             />
             <USelect
               type="text"

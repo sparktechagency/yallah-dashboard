@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Modal, Button, Input } from "antd";
+import { Modal, Button, Input, Switch } from "antd";
 import { Plus } from "lucide-react";
 import USelect from "@/components/Form/USelect";
 import UDatePicker from "@/components/Form/UDatePicker";
@@ -10,276 +10,358 @@ import countryList from "react-select-country-list";
 import toast from "react-hot-toast";
 import UInput from "@/components/Form/UInput";
 
-export default function AddCuponeModal({ open, setOpen, onSubmit }) {
+export default function AddCuponeModal({ open, setOpen }) {
   const [howToUseFields, setHowToUseFields] = useState([{ value: "" }]);
+  const [howToUseFieldsAr, setHowToUseFieldsAr] = useState([{ value: "" }]);
+  const [isFeatured, setIsFeatured] = useState(false);
+
   const [termsFields, setTermsFields] = useState([{ value: "" }]);
+  const [termsFieldsAr, setTermsFieldsAr] = useState([{ value: "" }]);
+
   const [searchText, setSearchText] = useState("");
 
-  // add cupon api call
   const [addCupon, { isLoading }] = useAddCouponMutation();
 
-  // get all stores api call
   const { data } = useGetAllStoresQuery({
     limit: 1000,
     page: 1,
     searchText,
   });
 
-  // Get country list using react-select-country-list
   const countryOptions = useMemo(() => {
-    const countries = countryList().getData();
-    return countries.map((country) => ({
-      label: country.label,
-      value: country.value,
-    }));
+    return countryList()
+      .getData()
+      .map((c) => ({ label: c.label, value: c.value }));
   }, []);
 
-  const handleAddField = () => {
-    setHowToUseFields([...howToUseFields, { value: "" }]);
-  };
-
-  const handleRemoveField = (index) => {
-    const updatedFields = howToUseFields.filter((_, i) => i !== index);
-    setHowToUseFields(updatedFields);
-  };
-
-  const handleFieldChange = (value, index) => {
-    const updatedFields = [...howToUseFields];
-    updatedFields[index].value = value;
-    setHowToUseFields(updatedFields);
-  };
-
-  const handleAddTermsField = () => {
-    setTermsFields([...termsFields, { value: "" }]);
-  };
-
-  const handleRemovetermsField = (index) => {
-    const updatedtermsFields = termsFields.filter((_, i) => i !== index);
-    setTermsFields(updatedtermsFields);
-  };
-
-  const handletermsFieldChange = (value, index) => {
-    const updatedtermsFields = [...termsFields];
-    updatedtermsFields[index].value = value;
-    setTermsFields(updatedtermsFields);
-  };
-
   const handleFormSubmit = async (value) => {
-    const howToUseData = howToUseFields
-      .map((field) => field.value)
-      .filter((value) => value.trim() !== "");
-    const termsData = termsFields
-      .map((field) => field.value)
-      .filter((value) => value.trim() !== "");
-    const formData = {
-      howToUse: howToUseData,
-      terms: termsData,
+    const howToUse = howToUseFields.map((f) => f.value).filter((v) => v.trim());
+    const arabicHowToUse = howToUseFieldsAr
+      .map((f) => f.value)
+      .filter((v) => v.trim());
+
+    const terms = termsFields.map((f) => f.value).filter((v) => v.trim());
+    const arabicTerms = termsFieldsAr
+      .map((f) => f.value)
+      .filter((v) => v.trim());
+
+    const payload = {
       ...value,
+      howToUse,
+      arabicHowToUse,
+      terms,
+      arabicTerms,
+      isFeatured,
     };
+
     try {
-      const response = await addCupon(formData).unwrap();
-      if (response?.success) {
-        toast.success(response?.message || "Coupon added successfully");
+      const res = await addCupon(payload).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Coupon added successfully");
         setOpen(false);
       }
     } catch (error) {
-      console.error("Error:", error);
       toast.error(error?.data?.message || "Failed to add coupon");
     }
   };
 
   return (
-    <div>
-      <Modal
-        centered
-        open={open}
-        footer={null}
-        onCancel={() => {
-          setOpen(false);
-        }}
-        title="Create Coupon"
-        width={1000}
-      >
-        <FormWrapper onSubmit={handleFormSubmit}>
-          <USelect
-            type="text"
-            name="store"
-            label="Store"
-            required={true}
-            placeholder="Enter store name"
-            options={data?.data?.data?.map((item) => ({
-              label: item?.name,
-              value: item?._id,
-            }))}
-            showSearch
-            onSearch={(value) => setSearchText(value)}
-          />
+    <Modal
+      centered
+      open={open}
+      footer={null}
+      onCancel={() => setOpen(false)}
+      title="Create Coupon"
+      width={1000}
+    >
+      <FormWrapper onSubmit={handleFormSubmit}>
+        {/* Store */}
+        <USelect
+          name="store"
+          label="Store"
+          required
+          placeholder="Enter store name"
+          options={data?.data?.data?.map((item) => ({
+            label: item?.name,
+            value: item?._id,
+          }))}
+          showSearch
+          onSearch={setSearchText}
+        />
+        {/* Countries */}
+        <USelect
+          name="countries"
+          mode="multiple"
+          label="Country Name"
+          required
+          placeholder="Select country"
+          options={countryOptions}
+        />
+        {/* Coupon Info */}
+        <UInput
+          name="code"
+          label="Coupon Code"
+          required
+          placeholder="Enter coupon code"
+        />
+        {/* Discount Title */}
+        <UInput
+          name="title"
+          label="Discount Title (English)"
+          required
+          placeholder="Enter discount title"
+        />
+        <UInput
+          name="arabicTitle"
+          label="عنوان الخصم (Arabic)"
+          required
+          placeholder="أدخل عنوان الخصم"
+          dir="rtl"
+        />
+        {/* Title */}
+        <UInput
+          name="subtitle"
+          label="Title (English)"
+          required
+          placeholder="Enter title"
+        />
+        <UInput
+          name="arabicSubtitle"
+          label="العنوان (Arabic)"
+          required
+          placeholder="أدخل العنوان"
+          dir="rtl"
+        />
+        <USelect
+          type="text"
+          name="type"
+          label="Type"
+          required={true}
+          placeholder="Select type"
+          options={[
+            { label: "Free", value: "free" },
+            { label: "Premium", value: "premium" },
+          ]}
+          showSearch
+          onSearch={(value) => setSearchText(value)}
+        />{" "}
+        <UInput
+          type="text"
+          name="link"
+          label="Store Link"
+          required={true}
+          placeholder="Enter store link"
+        />{" "}
+        <UInput
+          type="text"
+          name="arabicLink"
+          label="Arabic Link (optional)"
+          required={true}
+          placeholder="Enter arabic store link"
+        />{" "}
+        <UInput
+          type="number"
+          name="fakeUses"
+          label="Fake Uses"
+          required={true}
+          placeholder="Enter times used by user"
+        />
+        {/* Validity */}
+        <UDatePicker
+          name="validity"
+          label="Validity"
+          placeholder="Select date"
+        />
+        {/* How to Use - English */}
+        <h3 className="mt-4 font-medium">How to Use</h3>
+        {howToUseFields.map((field, index) => (
+          <div key={index} className="space-y-2">
+            <Input
+              value={field.value}
+              onChange={(e) => {
+                const arr = [...howToUseFields];
+                arr[index].value = e.target.value;
+                setHowToUseFields(arr);
+              }}
+              placeholder="Enter instruction"
+            />
 
+            <div className="!my-2 flex gap-2">
+              <Button
+                type="primary"
+                onClick={() =>
+                  setHowToUseFields([...howToUseFields, { value: "" }])
+                }
+                style={{ backgroundColor: "#032C61" }}
+              >
+                + Add
+              </Button>
+
+              {index > 0 && (
+                <Button
+                  danger
+                  onClick={() =>
+                    setHowToUseFields(
+                      howToUseFields.filter((_, i) => i !== index),
+                    )
+                  }
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        {/* How to Use - Arabic */}
+        <h3 className="mt-4 font-medium" dir="rtl">
+          طريقة الاستخدام
+        </h3>
+        {howToUseFieldsAr.map((field, index) => (
+          <div key={index} className="space-y-2" dir="rtl">
+            <Input
+              value={field.value}
+              onChange={(e) => {
+                const arr = [...howToUseFieldsAr];
+                arr[index].value = e.target.value;
+                setHowToUseFieldsAr(arr);
+              }}
+              placeholder="أدخل طريقة الاستخدام"
+            />
+
+            <div className="!my-2 flex gap-2">
+              <Button
+                type="primary"
+                onClick={() =>
+                  setHowToUseFieldsAr([...howToUseFieldsAr, { value: "" }])
+                }
+                style={{ backgroundColor: "#032C61" }}
+              >
+                + إضافة
+              </Button>
+
+              {index > 0 && (
+                <Button
+                  danger
+                  onClick={() =>
+                    setHowToUseFieldsAr(
+                      howToUseFieldsAr.filter((_, i) => i !== index),
+                    )
+                  }
+                >
+                  حذف
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        {/* Terms - English */}
+        <h3 className="mt-4 font-medium">Terms and Conditions</h3>
+        {termsFields.map((field, index) => (
+          <div key={index} className="space-y-2">
+            <Input
+              value={field.value}
+              onChange={(e) => {
+                const arr = [...termsFields];
+                arr[index].value = e.target.value;
+                setTermsFields(arr);
+              }}
+              placeholder="Enter terms"
+            />
+
+            <div className="!my-2 flex gap-2">
+              <Button
+                type="primary"
+                onClick={() => setTermsFields([...termsFields, { value: "" }])}
+                style={{ backgroundColor: "#032C61" }}
+              >
+                + Add
+              </Button>
+
+              {index > 0 && (
+                <Button
+                  danger
+                  onClick={() =>
+                    setTermsFields(termsFields.filter((_, i) => i !== index))
+                  }
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        {/* Terms - Arabic */}
+        <h3 className="mt-4 font-medium" dir="rtl">
+          الشروط والأحكام
+        </h3>
+        {termsFieldsAr.map((field, index) => (
+          <div key={index} className="space-y-2" dir="rtl">
+            <Input
+              value={field.value}
+              onChange={(e) => {
+                const arr = [...termsFieldsAr];
+                arr[index].value = e.target.value;
+                setTermsFieldsAr(arr);
+              }}
+              placeholder="أدخل الشروط والأحكام"
+              className="!mb-2 text-right"
+            />
+
+            <div className="!my-2 flex gap-2">
+              <Button
+                type="primary"
+                onClick={() =>
+                  setTermsFieldsAr([...termsFieldsAr, { value: "" }])
+                }
+                style={{ backgroundColor: "#032C61" }}
+              >
+                + إضافة
+              </Button>
+
+              {index > 0 && (
+                <Button
+                  danger
+                  onClick={() =>
+                    setTermsFieldsAr(
+                      termsFieldsAr.filter((_, i) => i !== index),
+                    )
+                  }
+                >
+                  حذف
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        <div className="mb-4">
+          {" "}
           <USelect
             type="text"
-            name="countries"
-            mode="multiple"
-            label="Country Name"
+            name="applicableUserType"
+            label="Applicable User Type"
             required={true}
-            placeholder="Select country"
-            options={countryOptions}
-            showSearch
-            onSearch={(value) => setSearchText(value)}
-          />
-          <USelect
-            type="text"
-            name="type"
-            label="Type"
-            required={true}
-            placeholder="Select type"
+            placeholder="Select user type"
             options={[
-              { label: "Free", value: "free" },
-              { label: "Premium", value: "premium" },
+              { label: "FIRST TIME", value: "FIRST_TIME" },
+              { label: "REPEAT", value: "REPEAT" },
+              { label: "BOTH", value: "BOTH" },
             ]}
-            showSearch
-            onSearch={(value) => setSearchText(value)}
-          />
-          <UInput
-            type="text"
-            name="link"
-            label="Store Link"
-            required={true}
-            placeholder="Enter store link"
-          />
-          <UInput
-            type="text"
-            name="arabicLink"
-            label="Arabic Link (optional)"
-            required={true}
-            placeholder="Enter arabic store link"
-          />
-          <UInput
-            type="number"
-            name="fakeUses"
-            label="Fake Uses"
-            required={true}
-            placeholder="Enter times used by user"
-          />
-          <UInput
-            type="text"
-            name="code"
-            label="Coupon Code"
-            required={true}
-            placeholder="Enter coupon code"
-          />
-          <UInput
-            type="text"
-            name="title"
-            label="Discount Title"
-            required={true}
-            placeholder="Enter discount title"
-          />
-          <UInput
-            type="text"
-            name="subtitle"
-            label=" Title"
-            required={true}
-            placeholder="Enter discount title"
-          />
-
-          <h1>Validity Period (optional)</h1>
-          <div className="grid grid-cols-2 gap-4">
-            <UDatePicker
-              name="validity"
-              label="Validity"
-              required={true}
-              placeholder="Enter validity date"
-            />
-          </div>
-          <h1 className="my-2 font-medium">How to Use</h1>
-          {howToUseFields.map((field, index) => (
-            <div
-              key={index}
-              style={{ marginBottom: "10px" }}
-              className="space-y-5"
-            >
-              <Input
-                value={field.value}
-                onChange={(e) => handleFieldChange(e.target.value, index)}
-                placeholder="Enter"
-                style={{ width: "100%", marginBottom: "5px" }}
-              />
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#032C61", marginRight: "10px" }}
-                onClick={handleAddField}
-              >
-                + Add New
-              </Button>
-              {index > 0 && (
-                <Button
-                  type="primary"
-                  style={{ backgroundColor: "#FF4D4F", borderColor: "#FF4D4F" }}
-                  onClick={() => handleRemoveField(index)}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          ))}
-          <h1 className="my-2 font-medium">Terms and Conditions</h1>
-          {termsFields.map((field, index) => (
-            <div
-              key={index}
-              style={{ marginBottom: "10px" }}
-              className="space-y-5"
-            >
-              <Input
-                value={field.value}
-                onChange={(e) => handletermsFieldChange(e.target.value, index)}
-                placeholder="Enter"
-                style={{ width: "100%", marginBottom: "5px" }}
-              />
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#032C61", marginRight: "10px" }}
-                onClick={handleAddTermsField}
-              >
-                + Add New
-              </Button>
-              {index > 0 && (
-                <Button
-                  type="primary"
-                  style={{ backgroundColor: "#FF4D4F", borderColor: "#FF4D4F" }}
-                  onClick={() => handleRemovetermsField(index)}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          ))}
-
-          <div className="mb-4">
-            <USelect
-              type="text"
-              name="applicableUserType"
-              label="Applicable User Type"
-              required={true}
-              placeholder="Select user type"
-              options={[
-                { label: "FIRST TIME", value: "FIRST_TIME" },
-                { label: "REPEAT", value: "REPEAT" },
-                { label: "BOTH", value: "BOTH" },
-              ]}
-            />
-          </div>
-
-          <Button
-            style={{ backgroundColor: "#032C61", width: "100%" }}
-            type="primary"
-            htmlType="submit"
-            icon={<Plus size={20} />}
-            loading={isLoading}
-          >
-            Create
-          </Button>
-        </FormWrapper>
-      </Modal>
-    </div>
+          />{" "}
+        </div>
+        <h1 className="my-4 font-medium">Is Featured :</h1>
+        {/* isFeatured */}
+        <Switch checked={isFeatured} onChange={(e) => setIsFeatured(e)} />
+        {/* Submit */}
+        <Button
+          className="mt-6 w-full"
+          type="primary"
+          htmlType="submit"
+          loading={isLoading}
+          icon={<Plus size={18} />}
+        >
+          Create Coupon
+        </Button>
+      </FormWrapper>
+    </Modal>
   );
 }

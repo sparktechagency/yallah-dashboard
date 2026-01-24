@@ -90,6 +90,8 @@ const EditbannerModal = ({ open, setOpen, selectedBanner }) => {
               title: selectedBanner?.title,
               subTitle: selectedBanner?.subTitle,
               coupon: selectedBanner?.coupon?._id || null,
+              arabicTitle: selectedBanner?.arabicTitle,
+              arabicSubTitle: selectedBanner?.arabicSubTitle,
               banner: selectedBanner?.image
                 ? [
                     {
@@ -97,6 +99,16 @@ const EditbannerModal = ({ open, setOpen, selectedBanner }) => {
                       name: "banner",
                       status: "done",
                       url: selectedBanner.image,
+                    },
+                  ]
+                : [],
+              arabicBanner: selectedBanner?.arabicImage
+                ? [
+                    {
+                      uid: "-1",
+                      name: "arabicBanner",
+                      status: "done",
+                      url: selectedBanner.arabicImage,
                     },
                   ]
                 : [],
@@ -120,21 +132,58 @@ const EditbannerModal = ({ open, setOpen, selectedBanner }) => {
                 <Button icon={<UploadOutlined />}>Upload Banner</Button>
               </Upload>
             </Form.Item>
+            <Form.Item
+              name="arabicBanner"
+              label="Banner (Arabic)"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              rules={[
+                { required: true, message: "Please upload a banner image" },
+              ]}
+            >
+              <Upload
+                listType="picture"
+                maxCount={1}
+                beforeUpload={() => false} // Prevent auto-upload
+              >
+                <Button icon={<UploadOutlined />}>
+                  Upload Banner (Arabic)
+                </Button>
+              </Upload>
+            </Form.Item>
 
+            {/* Title */}
             <Form.Item
               name="title"
-              label="Title"
+              label="Title (English)"
               rules={[{ required: true, message: "Please enter a title" }]}
             >
               <Input placeholder="Enter Title" />
             </Form.Item>
 
             <Form.Item
+              name="arabicTitle"
+              label="العنوان (Arabic)"
+              rules={[{ required: true, message: "يرجى إدخال العنوان" }]}
+            >
+              <Input placeholder="أدخل العنوان" dir="rtl" />
+            </Form.Item>
+
+            {/* Sub-Title */}
+            <Form.Item
               name="subTitle"
-              label="Sub-Title"
+              label="Sub-Title (English)"
               rules={[{ required: true, message: "Please enter a sub-title" }]}
             >
               <Input placeholder="Enter Sub-Title" />
+            </Form.Item>
+
+            <Form.Item
+              name="arabicSubTitle"
+              label="العنوان الفرعي (Arabic)"
+              rules={[{ required: true, message: "يرجى إدخال العنوان الفرعي" }]}
+            >
+              <Input placeholder="أدخل العنوان الفرعي" dir="rtl" />
             </Form.Item>
 
             <Form.Item

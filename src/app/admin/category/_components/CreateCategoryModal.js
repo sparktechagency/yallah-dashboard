@@ -17,6 +17,9 @@ export default function CreateCategoryModal({ open, setOpen }) {
       if (data.image && data.image[0]?.originFileObj) {
         formData.append("image", data.image[0].originFileObj);
       }
+      if (data.arabicImage && data.arabicImage[0]?.originFileObj) {
+        formData.append("arabicImage", data.arabicImage[0].originFileObj);
+      }
       const res = await addCategory(formData).unwrap();
       if (res?.success) {
         toast.success(res?.message || "Category added successfully");
@@ -38,18 +41,28 @@ export default function CreateCategoryModal({ open, setOpen }) {
       title="Create Category"
     >
       <FormWrapper onSubmit={handleSubmit}>
+        <UUpload type="file" name="image" label="Category " required={true} />
         <UUpload
           type="file"
-          name="image"
-          label="Category Image"
+          name="arabicImage"
+          label="صورة الفئة"
           required={true}
+          dir="rtl"
         />
         <UInput
           type="text"
           name="name"
-          label="Category Name"
+          label="Category Name (English)"
           required={true}
           placeholder="Enter category name"
+        />
+        <UInput
+          type="text"
+          name="arabicName"
+          label="اسم الفئة"
+          required={true}
+          placeholder="أدخل اسم الفئة"
+          dir="rtl"
         />
 
         <Button

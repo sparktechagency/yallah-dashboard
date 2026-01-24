@@ -46,6 +46,8 @@ export default function CategoryContainer() {
     key: inx + 1,
     name: item?.name,
     image: item?.image,
+    arabicImage: item?.arabicImage,
+    arabicName: item?.arabicName,
   }));
 
   if (isLoading) {
@@ -100,9 +102,16 @@ export default function CategoryContainer() {
             key={category.key}
             className="flex flex-col items-center rounded-xl border border-primary-blue/25 p-4 shadow"
           >
-            <div>
+            <div className="flex gap-5">
               <Image
                 src={category?.image}
+                alt={category?.name}
+                width={100}
+                height={100}
+                className="h-24 w-24 rounded-full object-cover"
+              />
+              <Image
+                src={category?.arabicImage}
                 alt={category?.name}
                 width={100}
                 height={100}
@@ -111,6 +120,9 @@ export default function CategoryContainer() {
             </div>
             <h4 className="mb-5 mt-2 text-2xl font-semibold">
               {category.name}
+            </h4>
+            <h4 className="mb-5 mt-2 text-2xl font-semibold">
+              {category.arabicName}
             </h4>
 
             <div className="flex-center w-full gap-x-3">

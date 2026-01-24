@@ -26,13 +26,8 @@ function ThumbnailList() {
     useDeletethumbnailsMutation();
 
   // Placeholder handlers for Edit and Delete (replace with your logic)
-  const handleEdit = (thumbnailId) => {
-    console.log("Edit thumbnail:", thumbnailId);
-    // TODO: e.g., Open edit modal or navigate to edit page
-  };
 
   const handleDelete = async (thumbnailId) => {
-    console.log("Delete thumbnail:", thumbnailId);
     try {
       const res = await deleteThumbnail(thumbnailId).unwrap();
       if (res?.success) {

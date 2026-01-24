@@ -32,6 +32,11 @@ const AddStoreModal = ({ open, setOpen }) => {
       formData.append("payload", JSON.stringify(values));
       formData.append("image", values.image[0].originFileObj);
       formData.append("thumbnail", values.thumbnail[0].originFileObj);
+      formData.append("arabicImage", values.arabicImage[0].originFileObj);
+      formData.append(
+        "arabicThumbnail",
+        values.arabicThumbnail[0].originFileObj,
+      );
       const res = await createStore(formData).unwrap();
       if (res?.success) {
         toast.success(res?.message || "Store added successfully");
@@ -54,7 +59,7 @@ const AddStoreModal = ({ open, setOpen }) => {
         minWidth: "max-content",
         position: "relative",
       }}
-      width={800}
+      width={900}
     >
       {/* Close Icon */}
       <div
@@ -80,9 +85,22 @@ const AddStoreModal = ({ open, setOpen }) => {
               required={true}
             />
             <UUpload
+              name="arabicImage"
+              label="شعار المتجر"
+              placeholder="قم برفع شعار المتجر"
+              required={true}
+            />
+
+            <UUpload
               name="thumbnail"
               label="Store Thumbnail"
               placeholder={"Upload Store Thumbnail"}
+              required={true}
+            />
+            <UUpload
+              name="arabicThumbnail"
+              label="صورة مصغرة للمتجر"
+              placeholder="قم برفع الصورة المصغرة للمتجر"
               required={true}
             />
             <USelect
@@ -104,6 +122,13 @@ const AddStoreModal = ({ open, setOpen }) => {
               label="Store Name"
               required={true}
               placeholder={"Enter Store Name"}
+            />
+            <UInput
+              name="arabicName"
+              label="اسم المتجر"
+              required={true}
+              placeholder="أدخل اسم المتجر"
+              dir="rtl"
             />
             <Button
               htmlType="submit"

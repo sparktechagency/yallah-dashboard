@@ -34,6 +34,7 @@ export default function EditCategoryModal({ open, setOpen, selectedCategory }) {
         onSubmit={handleSubmit}
         defaultValues={{
           name: selectedCategory?.name,
+          arabicName: selectedCategory?.arabicName,
         }}
       >
         <UInput
@@ -43,6 +44,15 @@ export default function EditCategoryModal({ open, setOpen, selectedCategory }) {
           required={true}
           size="large"
           placeholder="Enter category name"
+        />
+
+        <UInput
+          type="text"
+          name="arabicName"
+          label="اسم الفئة"
+          required={true}
+          placeholder="أدخل اسم الفئة"
+          dir="rtl"
         />
 
         <Button

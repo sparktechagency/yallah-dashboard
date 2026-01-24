@@ -54,6 +54,15 @@ const AddbannerModal = ({ open, setOpen }) => {
         toast.error("Please upload a valid image");
         return;
       }
+      if (
+        values.arabicBanner?.length > 0 &&
+        values.arabicBanner[0]?.originFileObj
+      ) {
+        formData.append("arabicImage", values.arabicBanner[0].originFileObj);
+      } else {
+        toast.error("Please upload a valid image");
+        return;
+      }
 
       const res = await addBanner(formData).unwrap();
 
@@ -102,25 +111,46 @@ const AddbannerModal = ({ open, setOpen }) => {
           {/* Banner Image */}
           <UUpload
             name="banner"
-            label="Banner"
+            label="Banner (English)"
             placeholder="Upload Banner"
             required
+          />
+          <UUpload
+            name="arabicBanner"
+            label="صورة البانر (Arabic)"
+            placeholder="قم برفع صورة البانر"
+            required
+            dir="rtl"
           />
 
           {/* Title */}
           <UInput
             name="title"
-            label="Title"
+            label="Title (English)"
             placeholder="Enter Title"
             required
+          />
+          <UInput
+            name="arabicTitle"
+            label="العنوان (Arabic)"
+            placeholder="أدخل العنوان"
+            required
+            dir="rtl"
           />
 
           {/* Subtitle */}
           <UInput
             name="subTitle"
-            label="Sub-Title"
+            label="Sub-Title (English)"
             placeholder="Enter Sub-Title"
             required
+          />
+          <UInput
+            name="arabicSubTitle"
+            label="العنوان الفرعي (Arabic)"
+            placeholder="أدخل العنوان الفرعي"
+            required
+            dir="rtl"
           />
 
           {/* Store Select */}
@@ -160,7 +190,7 @@ const AddbannerModal = ({ open, setOpen }) => {
 
           {/* Hint */}
           {!selectedStore && (
-            <p className="mt-1 text-xs text-reda-400">
+            <p className="text-reda-400 mt-1 text-xs">
               Please select a store to load coupons
             </p>
           )}

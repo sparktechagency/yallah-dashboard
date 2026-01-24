@@ -48,27 +48,59 @@ export default function StoreTable() {
     date: moment(item?.createdAt).format("ll"),
     thumbnail: item?.thumbnail,
     categories: item?.categories,
+    arabicName: item?.arabicName,
+    arabicImage: item?.arabicImage,
+    arabicThumbnail: item?.arabicThumbnail,
   }));
   const columns = [
     {
-      title: "Store Name",
+      title: "Store Name (En)",
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "Store Logo",
+      title: "Store Name (Ar)",
+      dataIndex: "arabicName",
+      key: "arabicName",
+    },
+    {
+      title: "Store Logo (En)",
       key: "img",
       render: (_, record) => (
         <Image alt="Store Logo" src={record?.img} width={50} height={50} />
       ),
     },
     {
-      title: "Store Thumbnail",
+      title: "Store Logo (Ar)",
+      key: "arabicImage",
+      render: (_, record) => (
+        <Image
+          alt="Store Logo"
+          src={record?.arabicImage}
+          width={50}
+          height={50}
+        />
+      ),
+    },
+    {
+      title: "Store Thumbnail (En)",
       key: "thumbnail",
       render: (_, record) => (
         <Image
           alt="thumbnail Logo"
           src={record?.thumbnail}
+          width={50}
+          height={50}
+        />
+      ),
+    },
+    {
+      title: "Store Thumbnail (Ar)",
+      key: "arabicThumbnail",
+      render: (_, record) => (
+        <Image
+          alt="thumbnail Logo"
+          src={record?.arabicThumbnail}
           width={50}
           height={50}
         />

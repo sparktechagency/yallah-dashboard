@@ -17,6 +17,7 @@ const UInput = ({
   style,
   max,
   required,
+  dir,
 }) => {
   return (
     <Controller
@@ -67,6 +68,7 @@ const UInput = ({
               suffix={suffix}
               style={style}
               max={max}
+              dir={dir}
             />
           )}
         </Form.Item>

@@ -20,6 +20,8 @@ import moment from "moment";
 export default function EditCuponeModal({ open, setOpen, couponId }) {
   const [howToUseFields, setHowToUseFields] = useState([{ value: "" }]);
   const [termsFields, setTermsFields] = useState([{ value: "" }]);
+  const [howToUseFieldsAr, setHowToUseFieldsAr] = useState([{ value: "" }]);
+  const [termsFieldsAr, setTermsFieldsAr] = useState([{ value: "" }]);
   const [searchText, setSearchText] = useState("");
   const [categoriesearchText, setCategoriesearchText] = useState("");
 
@@ -63,11 +65,22 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
         : [{ value: "" }];
       setHowToUseFields(howToUse);
 
+      // Set howToUseFieldsAr
+      const howToUseAr = couponData.data.arabicHowToUse?.length
+        ? couponData.data.arabicHowToUse.map((item) => ({ value: item }))
+        : [{ value: "" }];
+      setHowToUseFieldsAr(howToUseAr);
+
       // Set termsFields
       const terms = couponData.data.terms?.length
         ? couponData.data.terms.map((item) => ({ value: item }))
         : [{ value: "" }];
       setTermsFields(terms);
+      // Set termsFieldsAr
+      const termsAr = couponData.data.arabicTerms?.length
+        ? couponData.data.arabicTerms.map((item) => ({ value: item }))
+        : [{ value: "" }];
+      setTermsFieldsAr(termsAr);
     }
   }, [couponData, open]);
 
@@ -101,6 +114,27 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
     setTermsFields(updatedtermsFields);
   };
 
+  // Handlers for Arabic fields
+  const handleAddFieldAr = () =>
+    setHowToUseFieldsAr([...howToUseFieldsAr, { value: "" }]);
+  const handleRemoveFieldAr = (index) =>
+    setHowToUseFieldsAr(howToUseFieldsAr.filter((_, i) => i !== index));
+  const handleFieldChangeAr = (value, index) => {
+    const arr = [...howToUseFieldsAr];
+    arr[index].value = value;
+    setHowToUseFieldsAr(arr);
+  };
+
+  const handleAddTermsFieldAr = () =>
+    setTermsFieldsAr([...termsFieldsAr, { value: "" }]);
+  const handleRemoveTermsFieldAr = (index) =>
+    setTermsFieldsAr(termsFieldsAr.filter((_, i) => i !== index));
+  const handleTermsFieldChangeAr = (value, index) => {
+    const arr = [...termsFieldsAr];
+    arr[index].value = value;
+    setTermsFieldsAr(arr);
+  };
+
   const handleFormSubmit = async (value) => {
     const howToUseData = howToUseFields
       .map((field) => field.value)
@@ -108,10 +142,18 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
     const termsData = termsFields
       .map((field) => field.value)
       .filter((value) => value.trim() !== "");
+    const howToUseDataAr = howToUseFieldsAr
+      .map((field) => field.value)
+      .filter((v) => v.trim() !== "");
+    const termsDataAr = termsFieldsAr
+      .map((field) => field.value)
+      .filter((v) => v.trim() !== "");
     const formData = {
       ...value,
       howToUse: howToUseData,
       terms: termsData,
+      howToUseAr: howToUseDataAr,
+      termsAr: termsDataAr,
     };
 
     try {
@@ -157,6 +199,9 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             applicableUserType: couponData?.data?.applicableUserType,
             status: couponData?.data?.status,
             type: couponData?.data?.type,
+            arabicTitle: couponData?.data?.arabicTitle,
+            arabicSubtitle: couponData?.data?.arabicSubtitle,
+            arabicLink: couponData?.data?.arabicLink,
           }}
         >
           <USelect
@@ -234,8 +279,22 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
           />
           <UInput
             type="text"
+            name="arabicTitle"
+            label="Discount Title (Ar)"
+            required={true}
+            placeholder="Enter discount title"
+          />
+          <UInput
+            type="text"
             name="subtitle"
-            label="Subtitle"
+            label="Subtitle (English)"
+            required={true}
+            placeholder="Enter subtitle"
+          />
+          <UInput
+            type="text"
+            name="arabicSubtitle"
+            label="Subtitle (Ar)"
             required={true}
             placeholder="Enter subtitle"
           />
@@ -249,68 +308,147 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               placeholder="Enter validity date"
             />
           </div>
-          <h1 className="my-2 font-medium">How to Use</h1>
+
+          {/* How to Use */}
+          <h1 className="my-2 font-medium">How to Use (English)</h1>
           {howToUseFields.map((field, index) => (
-            <div
-              key={index}
-              style={{ marginBottom: "10px" }}
-              className="space-y-5"
-            >
+            <div key={index} className="space-y-2">
               <Input
                 value={field.value}
                 onChange={(e) => handleFieldChange(e.target.value, index)}
                 placeholder="Enter"
                 style={{ width: "100%", marginBottom: "5px" }}
               />
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#032C61", marginRight: "10px" }}
-                onClick={handleAddField}
-              >
-                + Add New
-              </Button>
-              {index > 0 && (
+              <div className="!my-3 flex gap-2">
                 <Button
                   type="primary"
-                  style={{ backgroundColor: "#FF4D4F", borderColor: "#FF4D4F" }}
-                  onClick={() => handleRemoveField(index)}
+                  style={{ backgroundColor: "#032C61" }}
+                  onClick={handleAddField}
                 >
-                  Remove
+                  + Add New
                 </Button>
-              )}
+                {index > 0 && (
+                  <Button
+                    type="primary"
+                    style={{
+                      backgroundColor: "#FF4D4F",
+                      borderColor: "#FF4D4F",
+                    }}
+                    onClick={() => handleRemoveField(index)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
-          <h1 className="my-2 font-medium">Terms and Conditions</h1>
+
+          <h1 className="my-2 font-medium" dir="rtl">
+            طريقة الاستخدام (Arabic)
+          </h1>
+          {howToUseFieldsAr.map((field, index) => (
+            <div key={index} className="space-y-2" dir="rtl">
+              <Input
+                value={field.value}
+                onChange={(e) => handleFieldChangeAr(e.target.value, index)}
+                placeholder="أدخل طريقة الاستخدام"
+                style={{ width: "100%", marginBottom: "5px" }}
+              />
+              <div className="!my-3 flex gap-2">
+                <Button
+                  type="primary"
+                  style={{ backgroundColor: "#032C61" }}
+                  onClick={handleAddFieldAr}
+                >
+                  + إضافة
+                </Button>
+                {index > 0 && (
+                  <Button
+                    type="primary"
+                    style={{
+                      backgroundColor: "#FF4D4F",
+                      borderColor: "#FF4D4F",
+                    }}
+                    onClick={() => handleRemoveFieldAr(index)}
+                  >
+                    حذف
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Terms & Conditions */}
+          <h1 className="my-2 font-medium">Terms and Conditions (English)</h1>
           {termsFields.map((field, index) => (
-            <div
-              key={index}
-              style={{ marginBottom: "10px" }}
-              className="space-y-5"
-            >
+            <div key={index} className="space-y-2">
               <Input
                 value={field.value}
                 onChange={(e) => handletermsFieldChange(e.target.value, index)}
                 placeholder="Enter"
                 style={{ width: "100%", marginBottom: "5px" }}
               />
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#032C61", marginRight: "10px" }}
-                onClick={handleAddTermsField}
-              >
-                + Add New
-              </Button>
-              {index > 0 && (
+              <div className="!my-3 flex gap-2">
                 <Button
                   type="primary"
-                  style={{ backgroundColor: "#FF4D4F", borderColor: "#FF4D4F" }}
-                  onClick={() => handleRemovetermsField(index)}
+                  style={{ backgroundColor: "#032C61" }}
+                  onClick={handleAddTermsField}
                 >
-                  Remove
+                  + Add New
                 </Button>
-              )}
+                {index > 0 && (
+                  <Button
+                    type="primary"
+                    style={{
+                      backgroundColor: "#FF4D4F",
+                      borderColor: "#FF4D4F",
+                    }}
+                    onClick={() => handleRemovetermsField(index)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
+
+          <h1 className="my-2 font-medium" dir="rtl">
+            الشروط والأحكام (Arabic)
+          </h1>
+          {termsFieldsAr.map((field, index) => (
+            <div key={index} className="space-y-2" dir="rtl">
+              <Input
+                value={field.value}
+                onChange={(e) =>
+                  handleTermsFieldChangeAr(e.target.value, index)
+                }
+                placeholder="أدخل الشروط والأحكام"
+                style={{ width: "100%", marginBottom: "5px" }}
+              />
+              <div className="!my-3 flex gap-2">
+                <Button
+                  type="primary"
+                  style={{ backgroundColor: "#032C61" }}
+                  onClick={handleAddTermsFieldAr}
+                >
+                  + إضافة
+                </Button>
+                {index > 0 && (
+                  <Button
+                    type="primary"
+                    style={{
+                      backgroundColor: "#FF4D4F",
+                      borderColor: "#FF4D4F",
+                    }}
+                    onClick={() => handleRemoveTermsFieldAr(index)}
+                  >
+                    حذف
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+
           <div className="mb-4">
             <USelect
               type="text"
