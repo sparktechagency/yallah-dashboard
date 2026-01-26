@@ -12,6 +12,7 @@ import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { Button, Modal } from "antd";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import countries from "world-countries";
 
 const PushNotificationModal = ({ open, setOpen }) => {
   const [searchText, setSearchText] = useState("");
@@ -74,6 +75,11 @@ const PushNotificationModal = ({ open, setOpen }) => {
     }
   };
 
+  const countryMap = countries.reduce((acc, c) => {
+    acc[c.cca2] = c.name.common;
+    return acc;
+  }, {});
+
   return (
     <div>
       <Modal
@@ -93,12 +99,28 @@ const PushNotificationModal = ({ open, setOpen }) => {
             required={true}
             placeholder="Enter title"
           />
+          <UInput
+            type="text"
+            name="arabicTitle"
+            label="العنوان (Arabic)"
+            required={true}
+            placeholder="أدخل العنوان"
+            dir="rtl"
+          />
           <UTextArea
             type="text"
             name="body"
             label="Notification Description"
             required={true}
             placeholder="Enter description"
+          />
+          <UTextArea
+            type="text"
+            name="arabicBody"
+            label="الوصف (Arabic)"
+            required={true}
+            placeholder="أدخل الوصف"
+            dir="rtl"
           />
           <h1 className="text-center text-lg font-bold">Targeting Filters</h1>
 
@@ -135,16 +157,16 @@ const PushNotificationModal = ({ open, setOpen }) => {
           <USelect
             label="Country"
             name="countries"
-            mode={"multiple"}
-            placeholder={"Select Country"}
-            required={true}
+            mode="multiple"
+            placeholder="Select Country"
+            required
+            disabled={singleCouponLoading}
             options={
-              singleCoupon?.data?.countries?.map((item) => ({
-                label: item,
-                value: item,
+              singleCoupon?.data?.countries?.map((code) => ({
+                label: countryMap[code] || code,
+                value: code,
               })) || []
             }
-            desabled={singleCouponLoading}
           />
 
           <Button

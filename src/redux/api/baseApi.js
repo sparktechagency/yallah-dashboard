@@ -55,6 +55,7 @@ export const baseApi = createApi({
     "alert",
     "viewers",
     "thumbnails",
+    "PopUps",
   ],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),

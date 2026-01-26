@@ -38,6 +38,7 @@
     "recharts": "^2.13.3",
     "redux-persist": "^6.0.0",
     "toast": "^0.5.4",
+    "world-countries": "^5.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

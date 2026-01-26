@@ -11,9 +11,10 @@ import UUpload from "@/components/Form/UUpload";
 
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
-import { useAddthumbnailsMutation } from "@/redux/api/thumbnailApi";
+import { useAddPopUpMutation } from "@/redux/api/popupAPi";
+import UInput from "@/components/Form/UInput";
 
-const AddThumbnailModal = ({ open, setOpen }) => {
+const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
@@ -39,7 +40,7 @@ const AddThumbnailModal = ({ open, setOpen }) => {
 
   // ---------------- Add Thumbnail API ----------------
   const [addThumbnail, { isLoading: isAddThumbnailLoading }] =
-    useAddthumbnailsMutation();
+    useAddPopUpMutation();
 
   // ---------------- Handle Submit ----------------
   const handleSubmit = async (values) => {
@@ -50,32 +51,26 @@ const AddThumbnailModal = ({ open, setOpen }) => {
       // English Thumbnail
       if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
         formData.append("image", values.thumbnail[0].originFileObj);
-      } else {
-        toast.error("Please upload a valid English thumbnail");
-        return;
       }
 
       // Arabic Thumbnail
-      if (
-        values.arabicThumbnail?.length > 0 &&
-        values.arabicThumbnail[0]?.originFileObj
-      ) {
-        formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
-      } else {
-        toast.error("Please upload a valid Arabic thumbnail");
-        return;
-      }
+      // if (
+      //   values.arabicThumbnail?.length > 0 &&
+      //   values.arabicThumbnail[0]?.originFileObj
+      // ) {
+      //   formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
+      // }
 
       const res = await addThumbnail(formData).unwrap();
 
       if (res?.success) {
-        toast.success(res?.message || "Thumbnail added successfully");
+        toast.success(res?.message || "Pop Up added successfully");
         form.resetFields();
         setOpen(false);
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error?.data?.message || "Failed to add thumbnail");
+      toast.error(error?.data?.message || "Failed to add Pop Up");
     }
   };
 
@@ -105,10 +100,24 @@ const AddThumbnailModal = ({ open, setOpen }) => {
       </div>
 
       <div className="pb-5">
-        <h4 className="text-center text-2xl font-medium">Add Thumbnail</h4>
+        <h4 className="text-center text-2xl font-medium">
+          Add Pop UP Thumbnail
+        </h4>
         <Divider />
 
-        <FormWrapper form={form} onSubmit={handleSubmit}>
+        <FormWrapper
+          form={form}
+          onSubmit={handleSubmit}
+          defaultValues={{
+            title: selectedBanner?.title,
+          }}
+        >
+          <UInput
+            name="title"
+            label="Title"
+            placeholder="Enter Title"
+            required
+          />
           {/* Store Select */}
           <USelect
             name="store"
@@ -127,7 +136,6 @@ const AddThumbnailModal = ({ open, setOpen }) => {
               form.setFieldsValue({ coupon: null });
             }}
           />
-
           {/* English Thumbnail */}
           <UUpload
             name="thumbnail"
@@ -135,20 +143,18 @@ const AddThumbnailModal = ({ open, setOpen }) => {
             placeholder="Upload English Thumbnail"
             required
           />
-
-          {/* Arabic Thumbnail */}
+          {/* Arabic Thumbnail
           <UUpload
             name="arabicThumbnail"
             label="الصورة المصغرة (Arabic)"
             placeholder="قم برفع الصورة المصغرة"
             required
             dir="rtl"
-          />
-
+          /> */}
           {/* Coupon Select */}
           <USelect
             name="coupon"
-            label="Coupon (Optional)"
+            label="Coupon"
             placeholder={selectedStore ? "Select Coupon" : "Select Store First"}
             disabled={!selectedStore}
             loading={couponLoading}
@@ -160,13 +166,11 @@ const AddThumbnailModal = ({ open, setOpen }) => {
             optionFilterProp="children"
             onSearch={handleSearch}
           />
-
           {!selectedStore && (
             <p className="mt-1 text-xs text-gray-400">
               Please select a store to load coupons
             </p>
           )}
-
           <Button
             htmlType="submit"
             className="mt-4 w-full"
@@ -185,4 +189,4 @@ const AddThumbnailModal = ({ open, setOpen }) => {
   );
 };
 
-export default AddThumbnailModal;
+export default EditPopUpModal;

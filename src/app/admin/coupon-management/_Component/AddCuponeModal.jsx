@@ -9,6 +9,7 @@ import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import countryList from "react-select-country-list";
 import toast from "react-hot-toast";
 import UInput from "@/components/Form/UInput";
+import countries from "world-countries";
 
 export default function AddCuponeModal({ open, setOpen }) {
   const [howToUseFields, setHowToUseFields] = useState([{ value: "" }]);
@@ -29,9 +30,10 @@ export default function AddCuponeModal({ open, setOpen }) {
   });
 
   const countryOptions = useMemo(() => {
-    return countryList()
-      .getData()
-      .map((c) => ({ label: c.label, value: c.value }));
+    return countries.map((c) => ({
+      label: c.name.common, // Full country name (Bangladesh, United States, etc.)
+      value: c.cca2, // ISO code (BD, US)
+    }));
   }, []);
 
   const handleFormSubmit = async (value) => {
@@ -93,9 +95,13 @@ export default function AddCuponeModal({ open, setOpen }) {
           name="countries"
           mode="multiple"
           label="Country Name"
-          required
           placeholder="Select country"
           options={countryOptions}
+          showSearch
+          optionFilterProp="label"
+          filterOption={(input, option) =>
+            option.label.toLowerCase().includes(input.toLowerCase())
+          }
         />
         {/* Coupon Info */}
         <UInput

@@ -2,7 +2,7 @@ import React from "react";
 
 const Loader = () => {
   return (
-    <div className="flex-center">
+    <div className="flex-center min-h-screen items-center">
       <section className="loader">
         <div className="slider" style={{ "--i": 0 }}></div>
         <div className="slider" style={{ "--i": 1 }}></div>

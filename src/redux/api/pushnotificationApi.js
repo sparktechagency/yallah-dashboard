@@ -17,8 +17,18 @@ const pushNotificationApi = baseApi.injectEndpoints({
       }),
       providesTags: ["alert"],
     }),
+    deleteNotification: builder.mutation({
+      query: (id) => ({
+        url: `/notifications/alerts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["alert"],
+    }),
   }),
 });
 
-export const { useSendPushNotificationMutation, useGetPushNotificationQuery } =
-  pushNotificationApi;
+export const {
+  useSendPushNotificationMutation,
+  useGetPushNotificationQuery,
+  useDeleteNotificationMutation,
+} = pushNotificationApi;

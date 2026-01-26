@@ -11,7 +11,6 @@ import {
   Plus,
   BadgeJapaneseYen,
   Store,
-  RailSymbol,
   ChartNetwork,
   ScrollText,
   LogOut,
@@ -77,6 +76,11 @@ const SidebarContainer = ({ collapsed }) => {
         key: "thumbnail",
         icon: <GalleryThumbnails size={21} strokeWidth={2} />,
         label: <Link href="/admin/addthumbnail"> Thumbnail Setting</Link>,
+      },
+      {
+        key: "popup-management",
+        icon: <GalleryThumbnails size={21} strokeWidth={2} />,
+        label: <Link href="/admin/popup-management"> Popup Management</Link>,
       },
       {
         key: "coupon-management",

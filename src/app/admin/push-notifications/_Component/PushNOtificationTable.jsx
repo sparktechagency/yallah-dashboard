@@ -1,12 +1,16 @@
 "use client";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import { Button, Table, Tag } from "antd";
-import { Edit, Plus, Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import React, { useState } from "react";
 import PushNotificationModal from "./PushNotificationModal";
-import { useGetPushNotificationQuery } from "@/redux/api/pushnotificationApi";
+import {
+  useDeleteNotificationMutation,
+  useGetPushNotificationQuery,
+} from "@/redux/api/pushnotificationApi";
 import moment from "moment";
 import Loader from "@/components/shared/Loader/Loader";
+import toast from "react-hot-toast";
 
 function PushNOtificationTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,9 +18,14 @@ function PushNOtificationTable() {
   // get notification data from api
   const { data: notificationData, isLoading } = useGetPushNotificationQuery();
 
+  // delete notification api call
+  const [deleteNotification, { isLoading: isDeleteLoading }] =
+    useDeleteNotificationMutation();
+
   const data = notificationData?.data?.data?.map((item, key) => ({
     key,
     title: item?.title,
+    id: item?._id,
     description: item?.body,
     Category: item?.coupon?.store?.categories
       ?.map((item) => item?.name)
@@ -26,6 +35,21 @@ function PushNOtificationTable() {
     Expiry: moment(item?.coupon?.validity).format("ll"),
     cuponTitle: item?.coupon?.title,
   }));
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  const handleDeleteNotification = async (id) => {
+    try {
+      const res = await deleteNotification(id).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Notification deleted successfully");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete notification");
+    }
+  };
 
   const columns = [
     { title: "Notification Title", dataIndex: "title" },
@@ -58,13 +82,13 @@ function PushNOtificationTable() {
     {
       title: "Actions",
       dataIndex: "actions",
-      render: () => (
+      render: (_, record) => (
         <div>
           <CustomConfirm
             title="Delete Coupon"
             description="Are you sure you want to delete this coupon?"
             onConfirm={() => {
-              // Handle delete action
+              handleDeleteNotification(record?.id);
             }}
           >
             <Button type="primary" size="small" danger className="ml-2">

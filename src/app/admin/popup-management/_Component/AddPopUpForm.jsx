@@ -11,9 +11,10 @@ import UUpload from "@/components/Form/UUpload";
 
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
-import { useAddthumbnailsMutation } from "@/redux/api/thumbnailApi";
+import { useAddPopUpMutation } from "@/redux/api/popupAPi";
+import UInput from "@/components/Form/UInput";
 
-const AddThumbnailModal = ({ open, setOpen }) => {
+const AddPopUpModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
@@ -39,7 +40,7 @@ const AddThumbnailModal = ({ open, setOpen }) => {
 
   // ---------------- Add Thumbnail API ----------------
   const [addThumbnail, { isLoading: isAddThumbnailLoading }] =
-    useAddthumbnailsMutation();
+    useAddPopUpMutation();
 
   // ---------------- Handle Submit ----------------
   const handleSubmit = async (values) => {
@@ -50,9 +51,6 @@ const AddThumbnailModal = ({ open, setOpen }) => {
       // English Thumbnail
       if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
         formData.append("image", values.thumbnail[0].originFileObj);
-      } else {
-        toast.error("Please upload a valid English thumbnail");
-        return;
       }
 
       // Arabic Thumbnail
@@ -61,21 +59,18 @@ const AddThumbnailModal = ({ open, setOpen }) => {
         values.arabicThumbnail[0]?.originFileObj
       ) {
         formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
-      } else {
-        toast.error("Please upload a valid Arabic thumbnail");
-        return;
       }
 
       const res = await addThumbnail(formData).unwrap();
 
       if (res?.success) {
-        toast.success(res?.message || "Thumbnail added successfully");
+        toast.success(res?.message || "Pop Up added successfully");
         form.resetFields();
         setOpen(false);
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error?.data?.message || "Failed to add thumbnail");
+      toast.error(error?.data?.message || "Failed to add Pop Up");
     }
   };
 
@@ -105,10 +100,25 @@ const AddThumbnailModal = ({ open, setOpen }) => {
       </div>
 
       <div className="pb-5">
-        <h4 className="text-center text-2xl font-medium">Add Thumbnail</h4>
+        <h4 className="text-center text-2xl font-medium">
+          Add Pop UP Thumbnail
+        </h4>
         <Divider />
 
         <FormWrapper form={form} onSubmit={handleSubmit}>
+          <UInput
+            name="title"
+            label="Title"
+            placeholder="Enter Title"
+          />
+
+          <UInput
+            name="arabicTitle"
+            label="العنوان (Arabic)"
+            placeholder="أدخل العنوان"
+            dir="rtl"
+          />
+
           {/* Store Select */}
           <USelect
             name="store"
@@ -148,7 +158,7 @@ const AddThumbnailModal = ({ open, setOpen }) => {
           {/* Coupon Select */}
           <USelect
             name="coupon"
-            label="Coupon (Optional)"
+            label="Coupon"
             placeholder={selectedStore ? "Select Coupon" : "Select Store First"}
             disabled={!selectedStore}
             loading={couponLoading}
@@ -185,4 +195,4 @@ const AddThumbnailModal = ({ open, setOpen }) => {
   );
 };
 
-export default AddThumbnailModal;
+export default AddPopUpModal;

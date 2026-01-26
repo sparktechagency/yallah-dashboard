@@ -175,7 +175,7 @@ const AddbannerModal = ({ open, setOpen }) => {
           {/* Coupon Select (Dependent) */}
           <USelect
             name="coupon"
-            label="Coupon"
+            label="Coupon (Optional)"
             placeholder={selectedStore ? "Select Coupon" : "Select Store First"}
             loading={couponLoading}
             disabled={!selectedStore} // 🔒 disabled until store selected
