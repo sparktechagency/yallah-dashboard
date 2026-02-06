@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { RiCloseLargeLine } from "react-icons/ri";
 
 const EditStoreModal = ({ open, setOpen, setStoreId }) => {
+  console.log("🚀 ~ EditStoreModal ~ setStoreId:", setStoreId)
   const [storeData, setStoreData] = useState({});
   const [categoriesearchText, setCategoriesearchText] = useState("");
 
@@ -111,6 +112,7 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
               name: storeData?.name,
               arabicName: storeData?.arabicName,
               categories: storeData?.categories?.map((item) => item),
+              isFeatured: storeData?.isFeatured,
             }}
             onSubmit={handleSubmit}
           >
@@ -196,6 +198,23 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
               }))}
               showSearch
               onSearch={(value) => setCategoriesearchText(value)}
+            />
+
+            <USelect
+              name="isFeatured"
+              label="Status"
+              required={true}
+              placeholder="Select Status Type featured or not featured"
+              options={[
+                {
+                  label: "Active",
+                  value: true,
+                },
+                {
+                  label: "Inactive",
+                  value: false,
+                },
+              ]}
             />
             <Button
               htmlType="submit"

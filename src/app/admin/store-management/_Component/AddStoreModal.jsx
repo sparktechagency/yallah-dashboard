@@ -77,7 +77,12 @@ const AddStoreModal = ({ open, setOpen }) => {
         <h4 className="text-center text-2xl font-medium">Add Store</h4>
         <Divider />
         <div className="flex-1">
-          <FormWrapper onSubmit={handleSubmit}>
+          <FormWrapper
+            onSubmit={handleSubmit}
+            defaultValues={{
+              isFeatured: false,
+            }}
+          >
             <UUpload
               name="image"
               label="Store Logo"
@@ -129,6 +134,25 @@ const AddStoreModal = ({ open, setOpen }) => {
               required={true}
               placeholder="أدخل اسم المتجر"
               dir="rtl"
+            />
+
+            {/* isActive */}
+
+            <USelect
+              name="isFeatured"
+              label="Status"
+              required={true}
+              placeholder="Select Status Type featured or not featured"
+              options={[
+                {
+                  label: "Active",
+                  value: true,
+                },
+                {
+                  label: "Inactive",
+                  value: false,
+                },
+              ]}
             />
             <Button
               htmlType="submit"

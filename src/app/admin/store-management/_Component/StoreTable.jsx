@@ -51,6 +51,7 @@ export default function StoreTable() {
     arabicName: item?.arabicName,
     arabicImage: item?.arabicImage,
     arabicThumbnail: item?.arabicThumbnail,
+    isFeatured: item?.isFeatured,
   }));
   const columns = [
     {
