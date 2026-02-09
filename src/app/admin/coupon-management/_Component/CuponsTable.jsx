@@ -49,7 +49,7 @@ function CuponsTable() {
   const data = cupone?.data?.data?.map((item, key) => ({
     key,
     id: item?._id,
-    code: item?.code,
+    code: item?.code || "N/A",
     Brand: item?.store?.map((brand) => brand.name).join(", "),
     UserType: item?.applicableUserType,
     Expiry: moment(item?.validity).format("ll"),
@@ -169,7 +169,13 @@ function CuponsTable() {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          onChange: (page) => setCurrentPage(page),
+          total: cupone?.data?.meta?.total,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+        }}
         style={{ marginTop: "20px" }}
         loading={{
           spinning: isLoading,

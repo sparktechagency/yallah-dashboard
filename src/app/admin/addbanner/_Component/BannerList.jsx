@@ -1,6 +1,6 @@
 "use client";
 import { Edit, Trash2, Tag } from "lucide-react";
-import { Image } from "antd";
+import { Image, Pagination } from "antd";
 import {
   useDeleteBannerMutation,
   useGetAllBannersQuery,
@@ -13,11 +13,13 @@ import toast from "react-hot-toast";
 export default function BannerManagement() {
   const [open, setOpen] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
   // get banner api call
   const { data, isLoading } = useGetAllBannersQuery({
     limit: 100,
-    page: 1,
-    searchText: "",
+    page: currentPage,
+    searchText: searchText,
   });
 
   // delete banner api call
@@ -94,7 +96,7 @@ export default function BannerManagement() {
             <p className="text-lg text-gray-500">No banners found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
             {banners.map((banner) => (
               <div
                 key={banner._id}
@@ -105,7 +107,7 @@ export default function BannerManagement() {
                     <Image
                       src={banner.image || "/placeholder.svg"}
                       alt={banner.title}
-                      className="!h-[320px] w-full object-cover"
+                      className="!h-[150px] w-full object-contain object-center"
                       onError={(e) => {
                         e.target.src = "/banner-placeholder.jpg";
                       }}
@@ -158,6 +160,16 @@ export default function BannerManagement() {
             ))}
           </div>
         )}
+      </div>
+      <div className="mt-10 flex justify-end">
+        <Pagination
+          current={currentPage}
+          total={data?.data?.meta?.total}
+          pageSize={"10"}
+          onChange={(page) => {
+            setCurrentPage(page);
+          }}
+        />
       </div>
       <EditbannerModal
         open={open}

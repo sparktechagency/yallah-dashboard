@@ -135,6 +135,10 @@ const AddThumbnailModal = ({ open, setOpen }) => {
             placeholder="Upload English Thumbnail"
             required
           />
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
 
           {/* Arabic Thumbnail */}
           <UUpload
@@ -144,6 +148,10 @@ const AddThumbnailModal = ({ open, setOpen }) => {
             required
             dir="rtl"
           />
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
 
           {/* Coupon Select */}
           <USelect

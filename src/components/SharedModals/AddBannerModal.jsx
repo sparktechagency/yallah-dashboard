@@ -115,6 +115,10 @@ const AddbannerModal = ({ open, setOpen }) => {
             placeholder="Upload Banner"
             required
           />
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
           <UUpload
             name="arabicBanner"
             label="صورة البانر (Arabic)"
@@ -122,6 +126,10 @@ const AddbannerModal = ({ open, setOpen }) => {
             required
             dir="rtl"
           />
+          <p className="mt-1 text-right text-xs text-gray-500" dir="rtl">
+            الصيغ المدعومة: JPG / PNG | المقاس الموصى به: 1200×675 بكسل | الحجم
+            الأقصى: 2 ميغابايت
+          </p>
 
           {/* Title */}
           <UInput

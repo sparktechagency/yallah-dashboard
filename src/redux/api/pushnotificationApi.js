@@ -11,8 +11,8 @@ const pushNotificationApi = baseApi.injectEndpoints({
       invalidatesTags: ["alert"],
     }),
     getPushNotification: builder.query({
-      query: () => ({
-        url: "/notifications/alerts",
+      query: ({ limit, page, searchText }) => ({
+        url: `/notifications/alerts?limit=${limit}&page=${page}&searchTerm=${searchText}`,
         method: "GET",
       }),
       providesTags: ["alert"],

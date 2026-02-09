@@ -1,6 +1,4 @@
 "use client";
-
-import Image from "next/image";
 import { EyeIcon, PencilIcon, TrashIcon } from "lucide-react";
 import {
   useDeletethumbnailsMutation,
@@ -10,14 +8,16 @@ import { useState } from "react";
 import EditthumbnailModal from "../../addbanner/_Component/EditthumbnailModal";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import toast from "react-hot-toast";
+import { Image, Pagination } from "antd";
 
 function ThumbnailList() {
   const [open, setOpen] = useState(false);
   const [selectedThumbnail, setSelectedThumbnail] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   // Get all thumbnails from API
   const { data, isLoading, isError } = useGetAllthumbnailsQuery({
     limit: 100,
-    page: 1,
+    page: currentPage,
     searchText: "",
   });
 
@@ -65,7 +65,7 @@ function ThumbnailList() {
       </h2>
 
       {/* Responsive Grid: 1 col on mobile, 2 on tablet, 3 on desktop */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
         {thumbnails.map((thumbnail) => (
           <div
             key={thumbnail._id}
@@ -77,15 +77,11 @@ function ThumbnailList() {
                 src={thumbnail?.image}
                 layout="fill"
                 alt={`Banner for ${thumbnail.coupon?.title || "Coupon"}`}
-                className="h-full w-full object-cover"
+                className="w-full object-contain object-center"
                 onError={(e) => {
                   e.target.src = "/fallback-image.jpg"; // Optional: Fallback image URL
                 }}
               />
-              {/* Optional: Overlay icon for "view" feel */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 transition-opacity duration-300 hover:bg-opacity-20 hover:opacity-100">
-                <EyeIcon className="h-8 w-8 text-white" />
-              </div>
             </div>
 
             {/* Coupon Details */}
@@ -126,7 +122,16 @@ function ThumbnailList() {
           </div>
         ))}
       </div>
-
+      <div className="mt-10 flex justify-end">
+        <Pagination
+          current={currentPage}
+          total={data?.data?.meta?.total}
+          pageSize={"10"}
+          onChange={(page) => {
+            setCurrentPage(page);
+          }}
+        />
+      </div>
       <EditthumbnailModal
         open={selectedThumbnail}
         setOpen={setSelectedThumbnail}

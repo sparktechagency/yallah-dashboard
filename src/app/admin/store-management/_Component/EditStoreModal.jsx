@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { RiCloseLargeLine } from "react-icons/ri";
 
 const EditStoreModal = ({ open, setOpen, setStoreId }) => {
-  console.log("🚀 ~ EditStoreModal ~ setStoreId:", setStoreId)
+  console.log("🚀 ~ EditStoreModal ~ setStoreId:", setStoreId);
   const [storeData, setStoreData] = useState({});
   const [categoriesearchText, setCategoriesearchText] = useState("");
 
@@ -130,6 +130,9 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                 },
               ]}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UUpload
               name="arabicImage"
               label="Store Logo (Ar)"
@@ -144,6 +147,9 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                 },
               ]}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UUpload
               name="thumbnail"
               label="Store Thumbnail"
@@ -158,6 +164,9 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                 },
               ]}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UUpload
               name="arabicThumbnail"
               label="Store Thumbnail (Ar)"
@@ -172,6 +181,9 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
                 },
               ]}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UInput
               name="name"
               label="Store Name"

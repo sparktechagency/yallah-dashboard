@@ -42,6 +42,9 @@ export default function CreateCategoryModal({ open, setOpen }) {
     >
       <FormWrapper onSubmit={handleSubmit}>
         <UUpload type="file" name="image" label="Category " required={true} />
+        <p className="my-4 text-xs text-gray-500">
+          Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
+        </p>
         <UUpload
           type="file"
           name="arabicImage"
@@ -49,6 +52,9 @@ export default function CreateCategoryModal({ open, setOpen }) {
           required={true}
           dir="rtl"
         />
+        <p className="my-4 text-xs text-gray-500">
+          Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
+        </p>
         <UInput
           type="text"
           name="name"

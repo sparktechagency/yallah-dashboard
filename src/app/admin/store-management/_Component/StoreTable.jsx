@@ -163,6 +163,13 @@ export default function StoreTable() {
           spinning: isLoading,
           indicator: <Loader />,
         }}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          onChange: (page) => setCurrentPage(page),
+          total: storeData?.data?.meta?.total,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+        }}
       />
       <AddStoreModal open={open} setOpen={setOpen} />
       <EditStoreModal

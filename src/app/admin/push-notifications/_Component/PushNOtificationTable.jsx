@@ -14,9 +14,14 @@ import toast from "react-hot-toast";
 
 function PushNOtificationTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // get notification data from api
-  const { data: notificationData, isLoading } = useGetPushNotificationQuery();
+  const { data: notificationData, isLoading } = useGetPushNotificationQuery({
+    limit: 10,
+    page: currentPage,
+    searchText: "",
+  });
 
   // delete notification api call
   const [deleteNotification, { isLoading: isDeleteLoading }] =
@@ -118,7 +123,13 @@ function PushNOtificationTable() {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          onChange: (page) => setCurrentPage(page),
+          total: notificationData?.data?.meta?.total,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+        }}
         loading={{
           spinning: isLoading,
           indicator: <Loader />,

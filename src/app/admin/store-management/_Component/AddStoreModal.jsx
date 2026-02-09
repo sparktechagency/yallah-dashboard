@@ -89,25 +89,36 @@ const AddStoreModal = ({ open, setOpen }) => {
               placeholder={"Upload Store Logo"}
               required={true}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UUpload
               name="arabicImage"
               label="شعار المتجر"
               placeholder="قم برفع شعار المتجر"
               required={true}
             />
-
+            <p className="my-4 text-xs text-gray-500">
+              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
+            </p>
             <UUpload
               name="thumbnail"
               label="Store Thumbnail"
               placeholder={"Upload Store Thumbnail"}
               required={true}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: JPG / PNG | Size: 800×600px | Aspect ratio 4:3 | Max: 2MB
+            </p>
             <UUpload
               name="arabicThumbnail"
               label="صورة مصغرة للمتجر"
               placeholder="قم برفع الصورة المصغرة للمتجر"
               required={true}
             />
+            <p className="my-4 text-xs text-gray-500">
+              Format: JPG / PNG | Size: 800×600px | Aspect ratio 4:3 | Max: 2MB
+            </p>
             <USelect
               type="text"
               mode="multiple"

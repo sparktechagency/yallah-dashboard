@@ -239,6 +239,13 @@ export default function AccDetailsTable() {
           spinning: isLoading,
           indicator: <Loader />,
         }}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          onChange: (page) => setCurrentPage(page),
+          total: user?.data?.meta?.total,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+        }}
       ></Table>
 
       <ProfileModal

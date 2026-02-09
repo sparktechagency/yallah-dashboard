@@ -137,6 +137,10 @@ const EditthumbnailModal = ({ open, setOpen, selectedBanner }) => {
                 <Button icon={<UploadOutlined />}>Upload Banner</Button>
               </Upload>
             </Form.Item>
+            <p className="!my-4 text-xs text-gray-500">
+              Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+              2MB
+            </p>
             <Form.Item
               name="arabicBanner"
               label="Banner Arabic"
@@ -154,7 +158,10 @@ const EditthumbnailModal = ({ open, setOpen, selectedBanner }) => {
                 <Button icon={<UploadOutlined />}>Upload Banner</Button>
               </Upload>
             </Form.Item>
-
+            <p className="!my-4 text-xs text-gray-500">
+              Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+              2MB
+            </p>
             <Form.Item
               name="coupon"
               label="Coupon"

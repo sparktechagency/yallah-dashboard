@@ -106,11 +106,7 @@ const AddPopUpModal = ({ open, setOpen }) => {
         <Divider />
 
         <FormWrapper form={form} onSubmit={handleSubmit}>
-          <UInput
-            name="title"
-            label="Title"
-            placeholder="Enter Title"
-          />
+          <UInput name="title" label="Title" placeholder="Enter Title" />
 
           <UInput
             name="arabicTitle"
@@ -145,7 +141,10 @@ const AddPopUpModal = ({ open, setOpen }) => {
             placeholder="Upload English Thumbnail"
             required
           />
-
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
           {/* Arabic Thumbnail */}
           <UUpload
             name="arabicThumbnail"
@@ -154,7 +153,10 @@ const AddPopUpModal = ({ open, setOpen }) => {
             required
             dir="rtl"
           />
-
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
           {/* Coupon Select */}
           <USelect
             name="coupon"
