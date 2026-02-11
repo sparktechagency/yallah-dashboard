@@ -14,7 +14,6 @@ import countries from "world-countries";
 export default function AddCuponeModal({ open, setOpen }) {
   const [howToUseFields, setHowToUseFields] = useState([{ value: "" }]);
   const [howToUseFieldsAr, setHowToUseFieldsAr] = useState([{ value: "" }]);
-  const [isFeatured, setIsFeatured] = useState(false);
 
   const [termsFields, setTermsFields] = useState([{ value: "" }]);
   const [termsFieldsAr, setTermsFieldsAr] = useState([{ value: "" }]);
@@ -36,7 +35,7 @@ export default function AddCuponeModal({ open, setOpen }) {
     }));
   }, []);
 
-  const handleFormSubmit = async (value) => {
+  const handleFormSubmit = async ({ couponType, ...value }) => {
     const howToUse = howToUseFields.map((f) => f.value).filter((v) => v.trim());
     const arabicHowToUse = howToUseFieldsAr
       .map((f) => f.value)
@@ -53,9 +52,15 @@ export default function AddCuponeModal({ open, setOpen }) {
       arabicHowToUse,
       terms,
       arabicTerms,
-      isFeatured,
+      isFeatured: couponType === "deal" ? true : false,
     };
 
+    if (couponType === "coupon" && !value.code) {
+      return toast.error("Please enter a coupon code");
+    }
+    if (couponType === "deal" && !value.link) {
+      return toast.error("Please enter the store link");
+    }
     try {
       const res = await addCupon(payload).unwrap();
       if (res?.success) {
@@ -63,6 +68,7 @@ export default function AddCuponeModal({ open, setOpen }) {
         setOpen(false);
       }
     } catch (error) {
+      console.error("Error:", error);
       toast.error(error?.data?.message || "Failed to add coupon");
     }
   };
@@ -103,10 +109,28 @@ export default function AddCuponeModal({ open, setOpen }) {
             option.label.toLowerCase().includes(input.toLowerCase())
           }
         />
+        {/* coupon type */}
+        <USelect
+          type="text"
+          name="couponType"
+          label="Type"
+          required={true}
+          placeholder="Select type"
+          options={[
+            { label: "Coupon", value: "coupon" },
+            { label: "Deal", value: "deal" },
+          ]}
+        />{" "}
         {/* Coupon Info */}
         <UInput
           name="code"
           label="Coupon Code"
+          placeholder="Enter discount percentage"
+        />
+        {/* Discount percentage */}
+        <UInput
+          name="discountPercentage"
+          label="Discount Percentage"
           required
           placeholder="Enter coupon code"
         />
@@ -141,7 +165,7 @@ export default function AddCuponeModal({ open, setOpen }) {
         <USelect
           type="text"
           name="type"
-          label="Type"
+          label="Access Type"
           required={true}
           placeholder="Select type"
           options={[
@@ -155,14 +179,12 @@ export default function AddCuponeModal({ open, setOpen }) {
           type="text"
           name="link"
           label="Store Link"
-          required={true}
           placeholder="Enter store link"
         />{" "}
         <UInput
           type="text"
           name="arabicLink"
           label="Arabic Link (optional)"
-          required={true}
           placeholder="Enter arabic store link"
         />{" "}
         <UInput
@@ -354,10 +376,6 @@ export default function AddCuponeModal({ open, setOpen }) {
             ]}
           />{" "}
         </div>
-        <h1 className="my-4 font-medium">Is Featured :</h1>
-        {/* isFeatured */}
-        <Switch checked={isFeatured} onChange={(e) => setIsFeatured(e)} />
-        {/* Submit */}
         <Button
           className="mt-6 w-full"
           type="primary"

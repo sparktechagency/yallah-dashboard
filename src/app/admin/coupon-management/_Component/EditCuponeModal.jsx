@@ -135,7 +135,7 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
     setTermsFieldsAr(arr);
   };
 
-  const handleFormSubmit = async (value) => {
+  const handleFormSubmit = async ({ couponType, ...value }) => {
     const howToUseData = howToUseFields
       .map((field) => field.value)
       .filter((value) => value.trim() !== "");
@@ -154,7 +154,15 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
       terms: termsData,
       howToUseAr: howToUseDataAr,
       termsAr: termsDataAr,
+      isFeatured: couponType === "deal" ? true : false,
     };
+
+    if (couponType === "coupon" && !value.code) {
+      return toast.error("Please enter a coupon code");
+    }
+    if (couponType === "deal" && !value.link) {
+      return toast.error("Please enter the store link");
+    }
 
     try {
       const response = await editCupon({ formData, id: couponId }).unwrap();
@@ -190,6 +198,7 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             link: couponData?.data?.link,
             fakeUses: couponData?.data?.fakeUses,
             title: couponData?.data?.title,
+            discountPercentage: couponData?.data?.discountPercentage,
             subtitle: couponData?.data?.subtitle,
             code: couponData?.data?.code,
             discount: couponData?.data?.discount,
@@ -202,6 +211,8 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             arabicTitle: couponData?.data?.arabicTitle,
             arabicSubtitle: couponData?.data?.arabicSubtitle,
             arabicLink: couponData?.data?.arabicLink,
+            couponType:
+              couponData?.data?.isFeatured == true ? "deal" : "coupon",
           }}
         >
           <USelect
@@ -217,7 +228,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             showSearch
             onSearch={(value) => setSearchText(value)}
           />
-
           <USelect
             type="text"
             name="countries"
@@ -227,12 +237,46 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             placeholder="Select country"
             options={countryOptions}
             showSearch
-            onSearch={(value) => setSearchText(value)}
+            optionFilterProp="label"
+            filterOption={(input, option) =>
+              option.label.toLowerCase().includes(input.toLowerCase())
+            }
+          />
+          {/* coupon type */}
+          <USelect
+            type="text"
+            name="couponType"
+            label="Type"
+            required={true}
+            placeholder="Select type"
+            options={[
+              { label: "Coupon", value: "coupon" },
+              { label: "Deal", value: "deal" },
+            ]}
+          />{" "}
+          <UInput
+            type="text"
+            name="link"
+            label="Store Link"
+            placeholder="Enter store link"
+          />
+          <UInput
+            type="text"
+            name="arabicLink"
+            label="Arabic Link (optional)"
+            placeholder="Enter arabic store link"
+          />
+          <UInput
+            type="number"
+            name="fakeUses"
+            label="Fake Uses"
+            required={true}
+            placeholder="Enter times used by user"
           />
           <USelect
             type="text"
             name="type"
-            label="Type"
+            label="Access Type"
             required={true}
             placeholder="Select type"
             options={[
@@ -244,29 +288,14 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
           />
           <UInput
             type="text"
-            name="link"
-            label="Store Link"
-            required={true}
-            placeholder="Enter store link"
-          />
-          <UInput
-            type="text"
-            name="arabicLink"
-            label="Arabic Link (optional)"
-            required={true}
-            placeholder="Enter arabic store link"
-          />
-          <UInput
-            type="number"
-            name="fakeUses"
-            label="Fake Uses"
-            required={true}
-            placeholder="Enter times used by user"
-          />
-          <UInput
-            type="text"
             name="code"
             label="Coupon Code"
+            placeholder="Enter coupon code"
+          />
+          {/* Discount percentage */}
+          <UInput
+            name="discountPercentage"
+            label="Discount Percentage"
             required={true}
             placeholder="Enter coupon code"
           />
@@ -298,7 +327,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
             required={true}
             placeholder="Enter subtitle"
           />
-
           <h1>Validity Period</h1>
           <div className="grid grid-cols-2 gap-4">
             <UDatePicker
@@ -308,7 +336,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               placeholder="Enter validity date"
             />
           </div>
-
           {/* How to Use */}
           <h1 className="my-2 font-medium">How to Use (English)</h1>
           {howToUseFields.map((field, index) => (
@@ -342,7 +369,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               </div>
             </div>
           ))}
-
           <h1 className="my-2 font-medium" dir="rtl">
             طريقة الاستخدام (Arabic)
           </h1>
@@ -377,7 +403,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               </div>
             </div>
           ))}
-
           {/* Terms & Conditions */}
           <h1 className="my-2 font-medium">Terms and Conditions (English)</h1>
           {termsFields.map((field, index) => (
@@ -411,7 +436,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               </div>
             </div>
           ))}
-
           <h1 className="my-2 font-medium" dir="rtl">
             الشروط والأحكام (Arabic)
           </h1>
@@ -448,7 +472,6 @@ export default function EditCuponeModal({ open, setOpen, couponId }) {
               </div>
             </div>
           ))}
-
           <div className="mb-4">
             <USelect
               type="text"
