@@ -4,23 +4,35 @@ import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
 import UUpload from "@/components/Form/UUpload";
 import { useCreateCategoriesMutation } from "@/redux/api/categoriesApi";
-import { Button, Modal, Form } from "antd";
+import { Button, Modal, Form, Upload } from "antd";
 import toast from "react-hot-toast";
+import { UploadOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 export default function CreateCategoryModal({ open, setOpen }) {
   const [form] = Form.useForm();
   const [addCategory, { isLoading }] = useCreateCategoriesMutation();
 
-  const handleSubmit = async (data) => {
+  const [uploadedImage, setUploadedImage] = useState([]);
+  const [uploadedArabicImage, setUploadedArabicImage] = useState([]);
+
+  const handleSubmit = async (data, { reset }) => {
     try {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(data));
 
-      if (data.image?.[0]?.originFileObj) {
-        formData.append("image", data.image[0].originFileObj);
+      // if (data.image?.[0]?.originFileObj) {
+      //   formData.append("image", data.image[0].originFileObj);
+      // }
+      // if (data.arabicImage?.[0]?.originFileObj) {
+      //   formData.append("arabicImage", data.arabicImage[0].originFileObj);
+      // }
+
+      if (uploadedImage?.[0]?.originFileObj) {
+        formData.append("image", uploadedImage[0].originFileObj);
       }
-      if (data.arabicImage?.[0]?.originFileObj) {
-        formData.append("arabicImage", data.arabicImage[0].originFileObj);
+      if (uploadedArabicImage?.[0]?.originFileObj) {
+        formData.append("arabicImage", uploadedArabicImage[0].originFileObj);
       }
 
       const res = await addCategory(formData).unwrap();
@@ -29,13 +41,11 @@ export default function CreateCategoryModal({ open, setOpen }) {
         toast.success(res?.message || "Category added successfully");
 
         // ✅ Reset the entire form including file uploads
-        form.resetFields({
-          image: [],         // Clear image upload
-          arabicImage: [],   // Clear Arabic image upload
-          name: "",          // Clear text fields if desired
-          arabicName: "",
-        });
-
+        setUploadedImage([]);
+        setUploadedArabicImage([]);
+        reset(); // Reset react-hook-form state
+        setUploadedImage([]);
+        setUploadedArabicImage([]);
         setOpen(false);
       }
     } catch (error) {
@@ -45,12 +55,12 @@ export default function CreateCategoryModal({ open, setOpen }) {
   };
 
   const handleClose = () => {
-    form.resetFields({
-      image: [],
-      arabicImage: [],
-      name: "",
-      arabicName: "",
-    });
+    // form.resetFields({
+    //   image: [],
+    //   arabicImage: [],
+    //   name: "",
+    //   arabicName: "",
+    // });
     setOpen(false);
   };
 
@@ -60,17 +70,61 @@ export default function CreateCategoryModal({ open, setOpen }) {
       open={open}
       footer={null}
       onCancel={handleClose}
-      closeIcon={false}
+      // closeIcon={false}
       destroyOnClose={false}
       title="Create Category"
     >
       <FormWrapper form={form} onSubmit={handleSubmit}>
-        <UUpload type="file" name="image" label="Category" required />
+        {/* <UUpload type="file" name="image" label="Category" required />
+        <p className="my-4 text-xs text-gray-500">
+          Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
+        </p> */}
+
+        <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+          <Upload
+            beforeUpload={() => false}
+            maxCount={1}
+            listType="picture"
+            fileList={uploadedImage}
+            onChange={({ fileList }) => setUploadedImage(fileList)}
+          >
+            <div className="flex w-full min-w-[472px] justify-center">
+              <Button icon={<UploadOutlined />} className="mx-auto">
+                Store Logo
+              </Button>
+            </div>
+          </Upload>
+        </div>
         <p className="my-4 text-xs text-gray-500">
           Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
         </p>
 
-        <UUpload type="file" name="arabicImage" label="صورة الفئة" required dir="rtl" />
+        {/* <UUpload
+          type="file"
+          name="arabicImage"
+          label="صورة الفئة"
+          required
+          dir="rtl"
+        />
+        <p className="my-4 text-xs text-gray-500">
+          Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
+        </p> */}
+
+        <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+          <Upload
+            beforeUpload={() => false}
+            maxCount={1}
+            listType="picture"
+            fileList={uploadedArabicImage}
+            onChange={({ fileList }) => setUploadedArabicImage(fileList)}
+          >
+            <div className="flex w-full min-w-[472px] justify-center">
+              <Button icon={<UploadOutlined />} className="mx-auto">
+                صورة الفئة
+              </Button>
+            </div>
+          </Upload>
+        </div>
         <p className="my-4 text-xs text-gray-500">
           Format: PNG / JPG | Size: 256×256px | Square image | Max: 1MB
         </p>
@@ -92,7 +146,9 @@ export default function CreateCategoryModal({ open, setOpen }) {
         />
 
         <Button
-          style={{ background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)" }}
+          style={{
+            background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
+          }}
           type="primary"
           size="large"
           className="w-full"

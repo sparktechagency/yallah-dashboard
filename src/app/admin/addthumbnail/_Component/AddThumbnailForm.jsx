@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Button, Divider, Form } from "antd";
+import { Modal, Button, Divider, Form, Upload } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
 import toast from "react-hot-toast";
 
@@ -12,11 +12,15 @@ import UUpload from "@/components/Form/UUpload";
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
 import { useAddthumbnailsMutation } from "@/redux/api/thumbnailApi";
+import { UploadOutlined } from "@ant-design/icons";
 
 const AddThumbnailModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
+
+  const [uploadedThumbnail, setUploadedThumbnail] = useState([]);
+  const [uploadedArabicThumbnail, setUploadedArabicThumbnail] = useState([]);
 
   // ================= Store API =================
   const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
@@ -42,25 +46,48 @@ const AddThumbnailModal = ({ open, setOpen }) => {
     useAddthumbnailsMutation();
 
   // ---------------- Handle Submit ----------------
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { reset }) => {
     try {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(values));
 
-      // English Thumbnail
-      if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
-        formData.append("image", values.thumbnail[0].originFileObj);
+      // // English Thumbnail
+      // if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
+      //   formData.append("image", values.thumbnail[0].originFileObj);
+      // } else {
+      //   toast.error("Please upload a valid English thumbnail");
+      //   return;
+      // }
+
+      // // Arabic Thumbnail
+      // if (
+      //   values.arabicThumbnail?.length > 0 &&
+      //   values.arabicThumbnail[0]?.originFileObj
+      // ) {
+      //   formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
+      // } else {
+      //   toast.error("Please upload a valid Arabic thumbnail");
+      //   return;
+      // }
+
+      if (
+        uploadedThumbnail?.length > 0 &&
+        uploadedThumbnail[0]?.originFileObj
+      ) {
+        formData.append("image", uploadedThumbnail[0].originFileObj);
       } else {
         toast.error("Please upload a valid English thumbnail");
         return;
       }
 
-      // Arabic Thumbnail
       if (
-        values.arabicThumbnail?.length > 0 &&
-        values.arabicThumbnail[0]?.originFileObj
+        uploadedArabicThumbnail?.length > 0 &&
+        uploadedArabicThumbnail[0]?.originFileObj
       ) {
-        formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
+        formData.append(
+          "arabicImage",
+          uploadedArabicThumbnail[0].originFileObj,
+        );
       } else {
         toast.error("Please upload a valid Arabic thumbnail");
         return;
@@ -71,6 +98,9 @@ const AddThumbnailModal = ({ open, setOpen }) => {
       if (res?.success) {
         toast.success(res?.message || "Thumbnail added successfully");
         form.resetFields();
+        setUploadedThumbnail([]);
+        setUploadedArabicThumbnail([]);
+        reset();
         setOpen(false);
       }
     } catch (error) {
@@ -129,7 +159,7 @@ const AddThumbnailModal = ({ open, setOpen }) => {
           />
 
           {/* English Thumbnail */}
-          <UUpload
+          {/* <UUpload
             name="thumbnail"
             label="Thumbnail"
             placeholder="Upload English Thumbnail"
@@ -138,16 +168,56 @@ const AddThumbnailModal = ({ open, setOpen }) => {
           <p className="!my-4 text-xs text-gray-500">
             Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
             2MB
-          </p>
+          </p> */}
 
           {/* Arabic Thumbnail */}
-          <UUpload
+          {/* <UUpload
             name="arabicThumbnail"
             label="الصورة المصغرة (Arabic)"
             placeholder="قم برفع الصورة المصغرة"
             required
             dir="rtl"
           />
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p> */}
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedThumbnail}
+              onChange={({ fileList }) => setUploadedThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Upload English Thumbnail
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedArabicThumbnail}
+              onChange={({ fileList }) => setUploadedArabicThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Upload Arabic Thumbnail
+                </Button>
+              </div>
+            </Upload>
+          </div>
           <p className="!my-4 text-xs text-gray-500">
             Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
             2MB

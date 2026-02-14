@@ -1,16 +1,19 @@
 "use client";
 
 import { Form } from "antd";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import isEqual from "lodash.isequal";
 
 export default function FormWrapper({
   onSubmit,
   children,
   defaultValues,
   resolver,
+  formRef,
   from,
 }) {
+  const preventDefaultValuesRef = useRef();
   const formConfig = {};
 
   if (resolver) {
@@ -20,6 +23,25 @@ export default function FormWrapper({
   // set default value-------------------------
   const methods = useForm(formConfig);
 
+  // Expose the reset method to parent
+  useEffect(() => {
+    if (formRef) {
+      formRef.current = {
+        reset: methods.reset,
+      };
+    }
+  }, [formRef, methods.reset]);
+
+  // ✅ Deep compare manually using lodash
+  useEffect(() => {
+    if (!isEqual(preventDefaultValuesRef.current, defaultValues)) {
+      preventDefaultValuesRef.current = defaultValues;
+      if (defaultValues) {
+        methods.reset(defaultValues);
+      }
+    }
+  }, [defaultValues, methods]);
+
   useEffect(() => {
     if (defaultValues) {
       // Set default values after form is mounted
@@ -28,8 +50,7 @@ export default function FormWrapper({
   }, [defaultValues, methods]);
 
   const handleSubmit = (data) => {
-    onSubmit(data);
-    methods.reset();
+    onSubmit(data, {reset: methods.reset});
   };
 
   return (

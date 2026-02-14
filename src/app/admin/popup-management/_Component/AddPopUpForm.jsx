@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Button, Divider, Form } from "antd";
+import { Modal, Button, Divider, Form, Upload } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
 import toast from "react-hot-toast";
 
@@ -13,11 +13,15 @@ import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
 import { useAddPopUpMutation } from "@/redux/api/popupAPi";
 import UInput from "@/components/Form/UInput";
+import { UploadOutlined } from "@ant-design/icons";
 
 const AddPopUpModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
+
+  const [uploadedThumbnail, setUploadedThumbnail] = useState([]);
+  const [uploadedArabicThumbnail, setUploadedArabicThumbnail] = useState([]);
 
   // ================= Store API =================
   const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
@@ -43,22 +47,35 @@ const AddPopUpModal = ({ open, setOpen }) => {
     useAddPopUpMutation();
 
   // ---------------- Handle Submit ----------------
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, {reset}) => {
     try {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(values));
 
-      // English Thumbnail
-      if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
-        formData.append("image", values.thumbnail[0].originFileObj);
-      }
+      // // English Thumbnail
+      // if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
+      //   formData.append("image", values.thumbnail[0].originFileObj);
+      // }
 
-      // Arabic Thumbnail
+      // // Arabic Thumbnail
+      // if (
+      //   values.arabicThumbnail?.length > 0 &&
+      //   values.arabicThumbnail[0]?.originFileObj
+      // ) {
+      //   formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
+      // }
+
       if (
-        values.arabicThumbnail?.length > 0 &&
-        values.arabicThumbnail[0]?.originFileObj
+        uploadedThumbnail?.length > 0 &&
+        uploadedThumbnail[0]?.originFileObj
       ) {
-        formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
+        formData.append("image", uploadedThumbnail[0].originFileObj);
+      }
+      if (
+        uploadedArabicThumbnail?.length > 0 &&
+        uploadedArabicThumbnail[0]?.originFileObj
+      ) {
+        formData.append("arabicImage", uploadedArabicThumbnail[0].originFileObj);
       }
 
       const res = await addThumbnail(formData).unwrap();
@@ -66,7 +83,11 @@ const AddPopUpModal = ({ open, setOpen }) => {
       if (res?.success) {
         toast.success(res?.message || "Pop Up added successfully");
         form.resetFields();
+        setUploadedThumbnail([]);
+        setUploadedArabicThumbnail([]);
+        setSelectedStore(null);
         setOpen(false);
+        reset();
       }
     } catch (error) {
       console.error("Error:", error);
@@ -135,7 +156,7 @@ const AddPopUpModal = ({ open, setOpen }) => {
           />
 
           {/* English Thumbnail */}
-          <UUpload
+          {/* <UUpload
             name="thumbnail"
             label="Thumbnail"
             placeholder="Upload English Thumbnail"
@@ -144,9 +165,9 @@ const AddPopUpModal = ({ open, setOpen }) => {
           <p className="!my-4 text-xs text-gray-500">
             Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
             2MB
-          </p>
+          </p> */}
           {/* Arabic Thumbnail */}
-          <UUpload
+          {/* <UUpload
             name="arabicThumbnail"
             label="الصورة المصغرة (Arabic)"
             placeholder="قم برفع الصورة المصغرة"
@@ -156,7 +177,48 @@ const AddPopUpModal = ({ open, setOpen }) => {
           <p className="!my-4 text-xs text-gray-500">
             Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
             2MB
+          </p> */}
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedThumbnail}
+              onChange={({ fileList }) => setUploadedThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Upload English Thumbnail
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
           </p>
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedArabicThumbnail}
+              onChange={({ fileList }) => setUploadedArabicThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  قم برفع الصورة المصغرة
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
+
           {/* Coupon Select */}
           <USelect
             name="coupon"

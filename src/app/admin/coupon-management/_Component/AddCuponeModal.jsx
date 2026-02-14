@@ -35,7 +35,7 @@ export default function AddCuponeModal({ open, setOpen }) {
     }));
   }, []);
 
-  const handleFormSubmit = async ({ couponType, ...value }) => {
+  const handleFormSubmit = async ({ couponType, ...value }, {reset}) => {
     const howToUse = howToUseFields.map((f) => f.value).filter((v) => v.trim());
     const arabicHowToUse = howToUseFieldsAr
       .map((f) => f.value)
@@ -66,6 +66,11 @@ export default function AddCuponeModal({ open, setOpen }) {
       if (res?.success) {
         toast.success(res?.message || "Coupon added successfully");
         setOpen(false);
+        setHowToUseFields([{ value: "" }]);
+        setHowToUseFieldsAr([{ value: "" }]);
+        setTermsFields([{ value: "" }]);
+        setTermsFieldsAr([{ value: "" }]);
+        reset();
       }
     } catch (error) {
       console.error("Error:", error);

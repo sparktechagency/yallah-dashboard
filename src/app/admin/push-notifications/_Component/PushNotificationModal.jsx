@@ -63,11 +63,12 @@ const PushNotificationModal = ({ open, setOpen }) => {
     value: item?._id,
   }));
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async (data, { reset }) => {
     try {
       const res = await addPushNotification(data).unwrap();
       if (res?.success) {
         toast.success(res?.message || "Notification sent successfully");
+        reset(); // Reset the form fields
         setOpen(false);
       }
     } catch (error) {

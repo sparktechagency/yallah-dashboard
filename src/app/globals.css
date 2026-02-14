@@ -164,3 +164,15 @@ body {
     filter: hue-rotate(180deg);
   }
 }
+
+.valueSelected .ant-select-selector,
+.valueSelected .ant-select-selector:focus,
+.valueSelected .ant-select-selector:hover {
+  border: 1px solid var(--primary-green) !important;
+}
+
+.valueNotSelected .ant-select-selector,
+.valueNotSelected .ant-select-selector:focus,
+.valueNotSelected .ant-select-selector:hover {
+  border: 1px solid var(--primary-blue) !important;
+}

@@ -24,6 +24,12 @@ export default function UUpload({
         // Initialize fileList with defaultFileList if field.value is undefined
         const fileList = field.value || defaultFileList;
 
+        // Use length + some stable value as key → forces full remount when empty
+        const uploadKey =
+          fileList.length > 0
+            ? `upload-${name}-${fileList.length}`
+            : `upload-${name}-empty`;
+
         return (
           <Form.Item
             name={name}
@@ -58,13 +64,32 @@ export default function UUpload({
             }}
           >
             <Upload
+              key={uploadKey}
               name={name}
               listType="picture"
               maxCount={1}
-              beforeUpload={() => false} // Prevent automatic upload
-              fileList={fileList} // Use fileList from Controller or defaultFileList
+              fileList={field.value || []}
               onChange={({ fileList }) => field.onChange(fileList)} // Update react-hook-form state
               defaultFileList={defaultFileList} // Set default file list for Upload component
+              beforeUpload={(file) => {
+                let isValidFileType = false;
+
+                if (fileType === "image") {
+                  isValidFileType = file.type.startsWith("image/");
+                } else if (fileType === "ical") {
+                  isValidFileType =
+                    file.type === "text/calendar" || file.name.endsWith(".ics");
+                }
+
+                if (!isValidFileType) {
+                  toast.error(
+                    `Invalid file type!! Only ${fileType} files are allowed.`,
+                  );
+                  return Upload.LIST_IGNORE;
+                }
+
+                return false; // prevent automatic upload
+              }}
             >
               <Button icon={<UploadCloud />}>Upload {label} Image</Button>
             </Upload>

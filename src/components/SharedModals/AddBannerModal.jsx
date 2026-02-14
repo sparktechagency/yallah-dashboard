@@ -1,5 +1,5 @@
 "use client";
-import { Button, Divider, Form, Modal } from "antd";
+import { Button, Divider, Form, Modal, Upload } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -10,12 +10,15 @@ import USelect from "../Form/USelect";
 import { useAddBannerMutation } from "@/redux/api/bannerApi";
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
+import { UploadOutlined } from "@ant-design/icons";
 
 const AddbannerModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
 
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
+  const [uploadedBanner, setUploadedBanner] = useState([]);
+  const [uploadedArabicBanner, setUploadedArabicBanner] = useState([]);
 
   // ================= Store API =================
   const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
@@ -42,23 +45,39 @@ const AddbannerModal = ({ open, setOpen }) => {
   const [addBanner, { isLoading: isBannerLoading }] = useAddBannerMutation();
 
   // ================= Submit =================
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, {reset}) => {
     try {
       const formData = new FormData();
 
       formData.append("payload", JSON.stringify(values));
 
-      if (values.banner?.length > 0 && values.banner[0]?.originFileObj) {
-        formData.append("image", values.banner[0].originFileObj);
+      // if (values.banner?.length > 0 && values.banner[0]?.originFileObj) {
+      //   formData.append("image", values.banner[0].originFileObj);
+      // } else {
+      //   toast.error("Please upload a valid image");
+      //   return;
+      // }
+      // if (
+      //   values.arabicBanner?.length > 0 &&
+      //   values.arabicBanner[0]?.originFileObj
+      // ) {
+      //   formData.append("arabicImage", values.arabicBanner[0].originFileObj);
+      // } else {
+      //   toast.error("Please upload a valid image");
+      //   return;
+      // }
+
+      if (uploadedBanner?.length > 0 && uploadedBanner[0]?.originFileObj) {
+        formData.append("image", uploadedBanner[0].originFileObj);
       } else {
         toast.error("Please upload a valid image");
         return;
       }
       if (
-        values.arabicBanner?.length > 0 &&
-        values.arabicBanner[0]?.originFileObj
+        uploadedArabicBanner?.length > 0 &&
+        uploadedArabicBanner[0]?.originFileObj
       ) {
-        formData.append("arabicImage", values.arabicBanner[0].originFileObj);
+        formData.append("arabicImage", uploadedArabicBanner[0].originFileObj);
       } else {
         toast.error("Please upload a valid image");
         return;
@@ -69,8 +88,11 @@ const AddbannerModal = ({ open, setOpen }) => {
       if (res?.success) {
         toast.success(res?.message || "Banner added successfully");
         form.resetFields();
+        setUploadedBanner([]);
+        setUploadedArabicBanner([]);
         setSelectedStore(null);
         setOpen(false);
+        reset();
       }
     } catch (error) {
       toast.error(error?.data?.message || "Failed to add banner");
@@ -109,7 +131,7 @@ const AddbannerModal = ({ open, setOpen }) => {
 
         <FormWrapper form={form} onSubmit={handleSubmit}>
           {/* Banner Image */}
-          <UUpload
+          {/* <UUpload
             name="banner"
             label="Banner (English)"
             placeholder="Upload Banner"
@@ -129,9 +151,49 @@ const AddbannerModal = ({ open, setOpen }) => {
           <p className="mt-1 text-right text-xs text-gray-500" dir="rtl">
             الصيغ المدعومة: JPG / PNG | المقاس الموصى به: 1200×675 بكسل | الحجم
             الأقصى: 2 ميغابايت
+          </p> */}
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedBanner}
+              onChange={({ fileList }) => setUploadedBanner(fileList)}
+            >
+              <div className="flex w-full min-w-[752px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Banner Image (English)
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
           </p>
 
-          {/* Title */}
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedArabicBanner}
+              onChange={({ fileList }) => setUploadedArabicBanner(fileList)}
+            >
+              <div className="flex w-full min-w-[752px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Banner Image (Arabic)
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="mt-1 text-right text-xs text-gray-500" dir="rtl">
+            الصيغ المدعومة: JPG / PNG | المقاس الموصى به: 1200×675 بكسل | الحجم
+            الأقصى: 2 ميغابايت
+          </p>
+
+          {/* Arabic Banner Image */}
           <UInput
             name="title"
             label="Title (English)"

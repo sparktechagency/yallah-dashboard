@@ -14,7 +14,7 @@ export default function AddViewerAndEditorModal({
   // add editor api call
   const [addEditor, { isLoading }] = useAddModaretorMutation();
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async (data, {reset}) => {
     const toastId = toast.loading(`Adding ...${role}`);
 
     const payload = { ...data, role: role };
@@ -24,6 +24,7 @@ export default function AddViewerAndEditorModal({
         toast.success(res?.message || "Editor added successfully", {
           id: toastId,
         });
+        reset();
         setOpen(false);
       }
     } catch (error) {
