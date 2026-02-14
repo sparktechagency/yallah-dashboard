@@ -1,8 +1,9 @@
 "use client";
+
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import { Button, Input, Table, Tag, Tooltip } from "antd";
 import { Edit, Eye, Plus, Search, Trash } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddCuponeModal from "./AddCuponeModal";
 import {
   useDeleteCouponMutation,
@@ -13,27 +14,30 @@ import CouponDetailsModal from "../../coupon-tracking/_Component/CouponeDetailsM
 import EditCuponeModal from "./EditCuponeModal";
 import toast from "react-hot-toast";
 import Loader from "@/components/shared/Loader/Loader";
+import debounce from "lodash/debounce";
 
 function CuponsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [couponDetails, setCouponDetails] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // get all coupons api call
+  const handleSearch = debounce((value) => {
+    setDebouncedSearch(value);
+    setCurrentPage(1);
+  }, 500);
+
   const { data: cupone, isLoading } = useGetAllCouponsQuery({
-    limit: 100,
+    limit: 50,
     page: currentPage,
-    searchText,
+    searchText: debouncedSearch,
   });
 
-  // delete coupon api call
   const [deleteCoupon, { isLoading: isDeleteLoading }] =
     useDeleteCouponMutation();
-
-  // delete coupone handeler
 
   const deleteCouponHandeler = async (id) => {
     try {
@@ -67,14 +71,12 @@ function CuponsTable() {
       title: "User Type",
       dataIndex: "UserType",
       render: (text) => (
-        <span className="">
-          <Tag
-            color={text === "First Time" ? "green" : "orange"}
-            className="rounded-md font-bold"
-          >
-            {text}
-          </Tag>
-        </span>
+        <Tag
+          color={text === "First Time" ? "green" : "orange"}
+          className="rounded-md font-bold"
+        >
+          {text}
+        </Tag>
       ),
     },
     { title: "Expiry", dataIndex: "Expiry" },
@@ -88,14 +90,12 @@ function CuponsTable() {
       title: "Status",
       dataIndex: "Status",
       render: (text) => (
-        <span className="">
-          <Tag
-            color={text === "Active" ? "green" : "red"}
-            className="rounded-md font-bold"
-          >
-            {text}
-          </Tag>
-        </span>
+        <Tag
+          color={text === "Active" ? "green" : "red"}
+          className="rounded-md font-bold"
+        >
+          {text}
+        </Tag>
       ),
     },
     {
@@ -127,9 +127,7 @@ function CuponsTable() {
           <CustomConfirm
             title="Delete Coupon"
             description="Are you sure you want to delete this coupon?"
-            onConfirm={() => {
-              deleteCouponHandeler(record?.id);
-            }}
+            onConfirm={() => deleteCouponHandeler(record?.id)}
             loading={isDeleteLoading}
           >
             <Button type="primary" size="small" danger className="ml-2">
@@ -149,7 +147,7 @@ function CuponsTable() {
             placeholder="Search coupons"
             prefix={<Search className="mr-2 text-black" size={20} />}
             className="h-11 !rounded-lg !border !text-base"
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
         <Button
@@ -166,22 +164,21 @@ function CuponsTable() {
           Add New Coupon
         </Button>
       </div>
+
       <Table
         columns={columns}
         dataSource={data}
         pagination={{
           current: currentPage,
-          pageSize: 10,
+          pageSize: 50,
+          total: cupone?.data?.meta?.total || 0,
           onChange: (page) => setCurrentPage(page),
-          total: cupone?.data?.meta?.total,
           showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
         }}
         style={{ marginTop: "20px" }}
-        loading={{
-          spinning: isLoading,
-          indicator: <Loader />,
-        }}
+        loading={{ spinning: isLoading, indicator: <Loader /> }}
       />
+
       <AddCuponeModal open={isModalOpen} setOpen={setIsModalOpen} />
       <CouponDetailsModal
         open={isCouponModalOpen}

@@ -13,6 +13,7 @@ import { RiCloseLargeLine } from "react-icons/ri";
 const EditStoreModal = ({ open, setOpen, setStoreId }) => {
   console.log("🚀 ~ EditStoreModal ~ setStoreId:", setStoreId);
   const [storeData, setStoreData] = useState({});
+
   const [categoriesearchText, setCategoriesearchText] = useState("");
 
   // Fetch the store data when the storeId is available
@@ -133,7 +134,7 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
             <p className="my-4 text-xs text-gray-500">
               Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
             </p>
-            <UUpload
+            {/* <UUpload
               name="arabicImage"
               label="Store Logo (Ar)"
               placeholder={"Upload Store Logo"}
@@ -149,7 +150,7 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
             />
             <p className="my-4 text-xs text-gray-500">
               Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
-            </p>
+            </p> */}
             <UUpload
               name="thumbnail"
               label="Store Thumbnail"
@@ -214,18 +215,13 @@ const EditStoreModal = ({ open, setOpen, setStoreId }) => {
 
             <USelect
               name="isFeatured"
-              label="Status"
-              required={true}
-              placeholder="Select Status Type featured or not featured"
+              label="Featured Status"
+              required
+              placeholder="Select status"
+              defaultValue={storeData?.isFeatured}
               options={[
-                {
-                  label: "Active",
-                  value: true,
-                },
-                {
-                  label: "Inactive",
-                  value: false,
-                },
+                { label: "Featured", value: true },
+                { label: "Not Featured", value: false },
               ]}
             />
             <Button

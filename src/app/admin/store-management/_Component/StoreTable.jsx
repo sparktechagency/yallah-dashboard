@@ -71,18 +71,18 @@ export default function StoreTable() {
         <Image alt="Store Logo" src={record?.img} width={50} height={50} />
       ),
     },
-    {
-      title: "Store Logo (Ar)",
-      key: "arabicImage",
-      render: (_, record) => (
-        <Image
-          alt="Store Logo"
-          src={record?.arabicImage}
-          width={50}
-          height={50}
-        />
-      ),
-    },
+    // {
+    //   title: "Store Logo (Ar)",
+    //   key: "arabicImage",
+    //   render: (_, record) => (
+    //     <Image
+    //       alt="Store Logo"
+    //       src={record?.arabicImage}
+    //       width={50}
+    //       height={50}
+    //     />
+    //   ),
+    // },
     {
       title: "Store Thumbnail (En)",
       key: "thumbnail",

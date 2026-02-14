@@ -1,4 +1,5 @@
 "use client";
+
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
 import USelect from "@/components/Form/USelect";
@@ -6,38 +7,53 @@ import UUpload from "@/components/Form/UUpload";
 import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 import { useAddStoreMutation } from "@/redux/api/storeApi";
 import { Button, Divider, Form, Modal } from "antd";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
-
 import { RiCloseLargeLine } from "react-icons/ri";
 
 const AddStoreModal = ({ open, setOpen }) => {
-  const [form] = Form.useForm();
   const [categoriesearchText, setCategoriesearchText] = useState("");
-  // create new store api call
+  const [form] = Form.useForm();
 
   const [createStore, { isLoading }] = useAddStoreMutation();
 
-  // get all categories from api
-  // get all categories api call
   const { data: categoriesData } = useGetCategoriesQuery({
     limit: 1000,
     page: 1,
     searchText: categoriesearchText,
   });
 
-  const handleSubmit = async (values) => {
+  // Stable default values for react-hook-form
+  const defaultValues = useMemo(
+    () => ({
+      name: "",
+      arabicName: "",
+      categories: [],
+      isFeatured: false,
+      image: [],
+      thumbnail: [],
+      arabicThumbnail: [],
+    }),
+    [],
+  );
+
+  const handleSubmit = async (data) => {
     try {
       const formData = new FormData();
-      formData.append("payload", JSON.stringify(values));
-      formData.append("image", values.image[0].originFileObj);
-      formData.append("thumbnail", values.thumbnail[0].originFileObj);
-      formData.append("arabicImage", values.arabicImage[0].originFileObj);
-      formData.append(
-        "arabicThumbnail",
-        values.arabicThumbnail[0].originFileObj,
-      );
+      formData.append("payload", JSON.stringify(data));
+
+      if (data.image?.[0]?.originFileObj)
+        formData.append("image", data.image[0].originFileObj);
+      if (data.thumbnail?.[0]?.originFileObj)
+        formData.append("thumbnail", data.thumbnail[0].originFileObj);
+      if (data.arabicThumbnail?.[0]?.originFileObj)
+        formData.append(
+          "arabicThumbnail",
+          data.arabicThumbnail[0].originFileObj,
+        );
+
       const res = await createStore(formData).unwrap();
+
       if (res?.success) {
         toast.success(res?.message || "Store added successfully");
         form.resetFields();
@@ -48,23 +64,24 @@ const AddStoreModal = ({ open, setOpen }) => {
     }
   };
 
+  const handleClose = () => {
+    form.resetFields(); // ✅ Reset manually when closing
+    setOpen(false);
+  };
+
   return (
     <Modal
       open={open}
       footer={null}
       centered
-      onCancel={() => setOpen(false)}
+      onCancel={handleClose}
       closeIcon={false}
-      style={{
-        minWidth: "max-content",
-        position: "relative",
-      }}
       width={900}
+      destroyOnClose={false} // Keep form instance alive
     >
-      {/* Close Icon */}
       <div
         className="absolute right-0 top-0 h-12 w-12 cursor-pointer rounded-bl-3xl"
-        onClick={() => setOpen(false)}
+        onClick={handleClose}
       >
         <RiCloseLargeLine
           size={18}
@@ -76,109 +93,79 @@ const AddStoreModal = ({ open, setOpen }) => {
       <div className="pb-5">
         <h4 className="text-center text-2xl font-medium">Add Store</h4>
         <Divider />
-        <div className="flex-1">
-          <FormWrapper
-            onSubmit={handleSubmit}
-            defaultValues={{
-              isFeatured: false,
+
+        <FormWrapper
+          form={form}
+          onSubmit={handleSubmit}
+          defaultValues={defaultValues}
+        >
+          <UUpload name="image" label="Store Logo" required />
+          <p className="my-4 text-xs text-gray-500">
+            Format: PNG / JPG | 512×512px | Max: 2MB
+          </p>
+
+          <UUpload name="thumbnail" label="Store Thumbnail" required />
+          <p className="my-4 text-xs text-gray-500">
+            Format: JPG / PNG | 800×600px | 4:3 | Max: 2MB
+          </p>
+
+          <UUpload name="arabicThumbnail" label="صورة مصغرة للمتجر" required />
+          <p className="my-4 text-xs text-gray-500">
+            Format: JPG / PNG | 800×600px | 4:3 | Max: 2MB
+          </p>
+
+          <USelect
+            mode="multiple"
+            name="categories"
+            label="Category Name"
+            required
+            placeholder="Select category"
+            options={categoriesData?.data?.data?.map((item) => ({
+              label: item?.name,
+              value: item?._id,
+            }))}
+            showSearch
+            onSearch={(value) => setCategoriesearchText(value)}
+          />
+
+          <UInput
+            name="name"
+            label="Store Name"
+            required
+            placeholder="Enter store name"
+          />
+          <UInput
+            name="arabicName"
+            label="اسم المتجر"
+            required
+            placeholder="أدخل اسم المتجر"
+            dir="rtl"
+          />
+
+          <USelect
+            name="isFeatured"
+            label="Featured Status"
+            required
+            placeholder="Select status"
+            options={[
+              { label: "Featured", value: true },
+              { label: "Not Featured", value: false },
+            ]}
+          />
+
+          <Button
+            htmlType="submit"
+            className="w-full"
+            size="large"
+            type="primary"
+            loading={isLoading}
+            style={{
+              background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
             }}
           >
-            <UUpload
-              name="image"
-              label="Store Logo"
-              placeholder={"Upload Store Logo"}
-              required={true}
-            />
-            <p className="my-4 text-xs text-gray-500">
-              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
-            </p>
-            <UUpload
-              name="arabicImage"
-              label="شعار المتجر"
-              placeholder="قم برفع شعار المتجر"
-              required={true}
-            />
-            <p className="my-4 text-xs text-gray-500">
-              Format: PNG / JPG | Size: 512×512px | Square logo | Max: 2MB
-            </p>
-            <UUpload
-              name="thumbnail"
-              label="Store Thumbnail"
-              placeholder={"Upload Store Thumbnail"}
-              required={true}
-            />
-            <p className="my-4 text-xs text-gray-500">
-              Format: JPG / PNG | Size: 800×600px | Aspect ratio 4:3 | Max: 2MB
-            </p>
-            <UUpload
-              name="arabicThumbnail"
-              label="صورة مصغرة للمتجر"
-              placeholder="قم برفع الصورة المصغرة للمتجر"
-              required={true}
-            />
-            <p className="my-4 text-xs text-gray-500">
-              Format: JPG / PNG | Size: 800×600px | Aspect ratio 4:3 | Max: 2MB
-            </p>
-            <USelect
-              type="text"
-              mode="multiple"
-              name="categories"
-              label="Category Name"
-              required={true}
-              placeholder="Enter category name"
-              options={categoriesData?.data?.data?.map((item) => ({
-                label: item?.name,
-                value: item?._id,
-              }))}
-              showSearch
-              onSearch={(value) => setCategoriesearchText(value)}
-            />
-            <UInput
-              name="name"
-              label="Store Name"
-              required={true}
-              placeholder={"Enter Store Name"}
-            />
-            <UInput
-              name="arabicName"
-              label="اسم المتجر"
-              required={true}
-              placeholder="أدخل اسم المتجر"
-              dir="rtl"
-            />
-
-            {/* isActive */}
-
-            <USelect
-              name="isFeatured"
-              label="Status"
-              required={true}
-              placeholder="Select Status Type featured or not featured"
-              options={[
-                {
-                  label: "Active",
-                  value: true,
-                },
-                {
-                  label: "Inactive",
-                  value: false,
-                },
-              ]}
-            />
-            <Button
-              htmlType="submit"
-              className="w-full"
-              size="large"
-              type="primary"
-              loading={isLoading}
-              style={{
-                background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
-              }}
-            >
-              Submit
-            </Button>
-          </FormWrapper>
-        </div>
+            Submit
+          </Button>
+        </FormWrapper>
       </div>
     </Modal>
   );

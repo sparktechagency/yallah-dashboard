@@ -41,7 +41,7 @@ const UInput = ({
               id={name}
               size={size}
               placeholder={placeholder}
-              className={`h-9 ${className}`}
+              className={`h-9 ${className || field?.value ? "border-green-600" : ""} `}
             />
           ) : type === "number" ? (
             <InputNumber
@@ -51,7 +51,7 @@ const UInput = ({
               size={size}
               placeholder={placeholder}
               disabled={disabled}
-              className={`h-9 !w-full ${className || ""}`}
+              className={`h-9 !w-full ${className || field?.value ? "border-green-700" : ""}`}
               suffix={suffix}
               style={style}
               max={max}
@@ -64,7 +64,7 @@ const UInput = ({
               size={size}
               placeholder={placeholder}
               disabled={disabled}
-              className={`h-9 ${className || ""}`}
+              className={`h-9 ${className || field?.value ? "border-green-600" : ""} `}
               suffix={suffix}
               style={style}
               max={max}
