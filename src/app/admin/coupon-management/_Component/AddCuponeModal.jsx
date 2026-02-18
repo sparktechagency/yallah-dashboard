@@ -6,7 +6,6 @@ import UDatePicker from "@/components/Form/UDatePicker";
 import FormWrapper from "@/components/Form/FormWrapper";
 import { useAddCouponMutation } from "@/redux/api/couponApi";
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
-import countryList from "react-select-country-list";
 import toast from "react-hot-toast";
 import UInput from "@/components/Form/UInput";
 import countries from "world-countries";
@@ -14,10 +13,8 @@ import countries from "world-countries";
 export default function AddCuponeModal({ open, setOpen }) {
   const [howToUseFields, setHowToUseFields] = useState([{ value: "" }]);
   const [howToUseFieldsAr, setHowToUseFieldsAr] = useState([{ value: "" }]);
-
   const [termsFields, setTermsFields] = useState([{ value: "" }]);
   const [termsFieldsAr, setTermsFieldsAr] = useState([{ value: "" }]);
-
   const [searchText, setSearchText] = useState("");
 
   const [addCupon, { isLoading }] = useAddCouponMutation();
@@ -35,7 +32,7 @@ export default function AddCuponeModal({ open, setOpen }) {
     }));
   }, []);
 
-  const handleFormSubmit = async ({ couponType, ...value }, {reset}) => {
+  const handleFormSubmit = async ({ couponType, ...value }, { reset }) => {
     const howToUse = howToUseFields.map((f) => f.value).filter((v) => v.trim());
     const arabicHowToUse = howToUseFieldsAr
       .map((f) => f.value)
@@ -383,6 +380,7 @@ export default function AddCuponeModal({ open, setOpen }) {
         </div>
         <Button
           className="mt-6 w-full"
+          style={{ backgroundColor: "#032C61", width: "100%" }}
           type="primary"
           htmlType="submit"
           loading={isLoading}

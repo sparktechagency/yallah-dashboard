@@ -20,7 +20,11 @@ const USelect = ({
     <Controller
       name={name}
       render={({
-        field: { onChange: fieldOnChange, value: fieldValue, label: fieldLabel },
+        field: {
+          onChange: fieldOnChange,
+          value: fieldValue,
+          label: fieldLabel,
+        },
         fieldState: { error },
       }) => (
         <Form.Item
@@ -42,7 +46,13 @@ const USelect = ({
             size={size}
             options={options}
             placeholder={placeholder}
-            className={(Array.isArray(fieldValue) && fieldValue.length > 0 || typeof fieldValue === "string" && fieldValue.toString().trim() !== "") ? "valueSelected" : "valueNotSelected"}
+            className={
+              (Array.isArray(fieldValue) && fieldValue.length > 0) ||
+              (typeof fieldValue === "string" &&
+                fieldValue.toString().trim() !== "")
+                ? "valueSelected"
+                : "valueNotSelected"
+            }
             style={{ ...style, height: style?.height || "35px" }}
             onChange={(value) => {
               fieldOnChange(value);

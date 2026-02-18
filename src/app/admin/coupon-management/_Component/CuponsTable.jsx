@@ -2,10 +2,11 @@
 
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import { Button, Input, Table, Tag, Tooltip } from "antd";
-import { Edit, Eye, Plus, Search, Trash } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { Copy, Edit, Eye, Filter, Plus, Search, Trash } from "lucide-react";
+import React, { useState } from "react";
 import AddCuponeModal from "./AddCuponeModal";
 import {
+  useAddCouponMutation,
   useDeleteCouponMutation,
   useGetAllCouponsQuery,
 } from "@/redux/api/couponApi";
@@ -15,15 +16,17 @@ import EditCuponeModal from "./EditCuponeModal";
 import toast from "react-hot-toast";
 import Loader from "@/components/shared/Loader/Loader";
 import debounce from "lodash/debounce";
+import DuplicateCuponeModal from "./DuplicateCuponModal";
 
 function CuponsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [couponDetails, setCouponDetails] = useState(null);
-  const [searchText, setSearchText] = useState("");
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSearch = debounce((value) => {
     setDebouncedSearch(value);
@@ -31,10 +34,12 @@ function CuponsTable() {
   }, 500);
 
   const { data: cupone, isLoading } = useGetAllCouponsQuery({
-    limit: 50,
+    limit: 10,
     page: currentPage,
     searchText: debouncedSearch,
   });
+
+  const [addCupon, { isLoading: isAddLoading }] = useAddCouponMutation();
 
   const [deleteCoupon, { isLoading: isDeleteLoading }] =
     useDeleteCouponMutation();
@@ -63,6 +68,60 @@ function CuponsTable() {
     discounttitle: item?.title,
   }));
 
+  // // Function to duplicate a coupon
+  const handleDuplicateCoupon = async (couponId) => {
+    toast.loading("Duplicating coupon...", { id: "duplicate" });
+    // Fetch the coupon details using the coupon ID
+    const couponToDuplicate = cupone?.data?.data?.find(
+      (coupon) => coupon._id === couponId,
+    );
+
+    if (!couponToDuplicate) {
+      toast.error("Coupon not found for duplication.");
+      return;
+    }
+
+    // Prepare the payload for duplication (you can customize this to copy exactly what you want)
+    const duplicatedCouponPayload = {
+      ...couponToDuplicate,
+      _id: undefined, // Do not include the ID of the original coupon
+      title: `${couponToDuplicate.title}`, // Customize as needed
+      subtitle: `${couponToDuplicate.subtitle}`,
+      code: couponToDuplicate.code, // Can generate new code if needed
+      isFeatured: couponToDuplicate.isFeatured, // Copy relevant fields
+      // Copying all fields that exist in the create coupon form
+      store: couponToDuplicate.store?.[0]?._id,
+      countries: couponToDuplicate.countries,
+      couponType: couponToDuplicate.couponType,
+      discountPercentage: couponToDuplicate.discountPercentage,
+      arabicTitle: couponToDuplicate.arabicTitle,
+      subtitle: couponToDuplicate.subtitle,
+      arabicSubtitle: couponToDuplicate.arabicSubtitle,
+      link: couponToDuplicate.link,
+      arabicLink: couponToDuplicate.arabicLink,
+      fakeUses: couponToDuplicate.fakeUses,
+      validity: couponToDuplicate.validity,
+      howToUse: couponToDuplicate.howToUse, // Copy how to use instructions
+      arabicHowToUse: couponToDuplicate.arabicHowToUse, // Copy arabic how to use instructions
+      terms: couponToDuplicate.terms, // Copy terms and conditions
+      arabicTerms: couponToDuplicate.arabicTerms, // Copy arabic terms and conditions
+      applicableUserType: couponToDuplicate.applicableUserType,
+      status: couponToDuplicate.status,
+      // Add any other custom fields if necessary
+    };
+
+    // Call the API to create the duplicated coupon
+    try {
+      const res = await addCupon(duplicatedCouponPayload).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Coupon duplicated successfully");
+        toast.dismiss("duplicate");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to duplicate coupon");
+    }
+  };
+
   const columns = [
     { title: "Coupon Code", dataIndex: "code" },
     { title: "Discount Title", dataIndex: "discounttitle" },
@@ -89,6 +148,24 @@ function CuponsTable() {
     {
       title: "Status",
       dataIndex: "Status",
+      filters: [
+        {
+          text: "Active",
+          value: "Active",
+        },
+        {
+          text: "Inactive",
+          value: "Inactive",
+        },
+      ],
+      filterIcon: () => (
+        <Filter
+          size={18}
+          color="#1B70A6"
+          className="flex items-start justify-start"
+        />
+      ),
+      onFilter: (value, record) => record.Status.indexOf(value) === 0,
       render: (text) => (
         <Tag
           color={text === "Active" ? "green" : "red"}
@@ -124,6 +201,17 @@ function CuponsTable() {
             </button>
           </Tooltip>
 
+          <Tooltip title="Duplicate">
+            <Button
+              className="cursor-pointer"
+              onClick={() => {
+                handleDuplicateCoupon(record?.id);
+              }}
+              size="small"
+            >
+              <Copy color="#1B70A6" size={18} />
+            </Button>
+          </Tooltip>
           <CustomConfirm
             title="Delete Coupon"
             description="Are you sure you want to delete this coupon?"
@@ -170,9 +258,14 @@ function CuponsTable() {
         dataSource={data}
         pagination={{
           current: currentPage,
-          pageSize: 50,
+          pageSize: pageSize,
           total: cupone?.data?.meta?.total || 0,
-          onChange: (page) => setCurrentPage(page),
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100"],
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+          },
           showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
         }}
         style={{ marginTop: "20px" }}
@@ -190,6 +283,11 @@ function CuponsTable() {
         setOpen={setIsEditModalOpen}
         couponId={couponDetails}
       />
+      {/* <DuplicateCuponeModal
+        open={isDuplicateModalOpen}
+        setOpen={setIsDuplicateModalOpen}
+        couponId={couponDetails}
+      /> */}
     </div>
   );
 }
