@@ -53,7 +53,7 @@ export default function AdminTable() {
         toast.success(res?.message || "Admin deleted successfully");
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to delete viewer");
+      toast.error(error?.data?.message || "Failed to deleted viewer");
     }
   };
 
