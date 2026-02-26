@@ -42,6 +42,32 @@ const EditorApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["editor"],
     }),
+
+    // get admin
+    getAdmins: builder.query({
+      query: () => ({
+        url: `/admins/all`,
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
+
+    addAdmin: builder.mutation({
+      query: (data) => ({
+        url: "/admins",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
+    deleteAdmin: builder.mutation({
+      query: (id) => ({
+        url: `/admins/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["admin"],
+    }),
   }),
 });
 
@@ -51,4 +77,7 @@ export const {
   useDeleteEditorMutation,
   useUpdateEditorMutation,
   useChangeRoleMutation,
+  useGetAdminsQuery,
+  useAddAdminMutation,
+  useDeleteAdminMutation,
 } = EditorApi;

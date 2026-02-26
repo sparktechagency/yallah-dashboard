@@ -1,34 +1,29 @@
 "use client";
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
-import { useAddModaretorMutation } from "@/redux/api/editorsApi";
+import { useAddAdminMutation } from "@/redux/api/editorsApi";
 import { Button, Modal } from "antd";
 import toast from "react-hot-toast";
 
-export default function AddViewerAndEditorModal({
-  open,
-  setOpen,
-  role,
-  title,
-}) {
+export default function AddAdminModal({ open, setOpen, role, title }) {
   // add editor api call
-  const [addEditor, { isLoading }] = useAddModaretorMutation();
+  const [addEditor, { isLoading }] = useAddAdminMutation();
 
   const handleSubmit = async (data, { reset }) => {
     const toastId = toast.loading(`Adding ...${role}`);
 
-    const payload = { ...data, role: role };
+    const payload = { ...data };
     try {
       const res = await addEditor(payload).unwrap();
       if (res?.success) {
-        toast.success(res?.message || "Editor added successfully", {
+        toast.success(res?.message || "Admin added successfully", {
           id: toastId,
         });
         reset();
         setOpen(false);
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to add editor");
+      toast.error(error?.data?.message || "Failed to add admin");
     }
   };
   return (

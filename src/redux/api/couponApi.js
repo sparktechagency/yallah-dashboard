@@ -13,10 +13,30 @@ const CpuponApi = baseApi.injectEndpoints({
     }),
     // Get all coupons
     getAllCoupons: builder.query({
-      query: ({ limit, page, searchText }) => ({
-        url: `/coupons?limit=${limit}&page=${page}&searchTerm=${searchText}`,
-        method: "GET",
-      }),
+      query: ({ limit, page, searchText, countries, storeId }) => {
+        const params = {
+          limit,
+          page,
+        };
+
+        if (searchText) {
+          params.searchTerm = searchText;
+        }
+
+        if (countries) {
+          params.countries = countries;
+        }
+
+        if (storeId) {
+          params.store = storeId;
+        }
+
+        return {
+          url: "/coupons",
+          method: "GET",
+          params,
+        };
+      },
       providesTags: ["coupon"],
     }),
     // Get coupon by id

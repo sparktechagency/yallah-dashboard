@@ -1,9 +1,9 @@
 "use client";
 
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
-import { Button, Input, Table, Tag, Tooltip } from "antd";
+import { Button, Input, Select, Table, Tag, Tooltip } from "antd";
 import { Copy, Edit, Eye, Filter, Plus, Search, Trash } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import AddCuponeModal from "./AddCuponeModal";
 import {
   useAddCouponMutation,
@@ -16,17 +16,19 @@ import EditCuponeModal from "./EditCuponeModal";
 import toast from "react-hot-toast";
 import Loader from "@/components/shared/Loader/Loader";
 import debounce from "lodash/debounce";
-import DuplicateCuponeModal from "./DuplicateCuponModal";
+import countryList from "react-select-country-list";
+import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 
 function CuponsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [couponDetails, setCouponDetails] = useState(null);
-  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [selectedStore, setSelectedStore] = useState("");
 
   const handleSearch = debounce((value) => {
     setDebouncedSearch(value);
@@ -37,9 +39,19 @@ function CuponsTable() {
     limit: 10,
     page: currentPage,
     searchText: debouncedSearch,
+    countries: selectedCountry,
+    storeId: selectedStore,
   });
 
-  const [addCupon, { isLoading: isAddLoading }] = useAddCouponMutation();
+  // get store
+  // get store data from api
+  const { data: storeData, isLoading: isStoreLoading } = useGetAllStoresQuery({
+    limit: 999999900000000,
+    page: 1,
+    searchText: " ",
+  });
+
+  const [addCupon] = useAddCouponMutation();
 
   const [deleteCoupon, { isLoading: isDeleteLoading }] =
     useDeleteCouponMutation();
@@ -59,7 +71,7 @@ function CuponsTable() {
     key,
     id: item?._id,
     code: item?.code || "N/A",
-    Brand: item?.store?.map((brand) => brand.name).join(", "),
+    Brand: item?.store?.map((brand) => brand.name).join(", ") || "N/A",
     UserType: item?.applicableUserType,
     Expiry: moment(item?.validity).format("ll"),
     Status: item?.status === "active" ? "Active" : "Inactive",
@@ -122,6 +134,23 @@ function CuponsTable() {
     }
   };
 
+  // Get country list using react-select-country-list
+  const countryOptions = useMemo(() => {
+    const countries = countryList().getData();
+    return countries.map((country) => ({
+      label: country.label,
+      value: country.value,
+    }));
+  }, []);
+
+  // get store name and id for filter
+  const storeOptions = useMemo(() => {
+    return storeData?.data?.data?.map((store) => ({
+      label: store?.name,
+      value: store?._id,
+    }));
+  }, [storeData?.data?.data]);
+
   const columns = [
     { title: "Coupon Code", dataIndex: "code" },
     { title: "Discount Title", dataIndex: "discounttitle" },
@@ -129,6 +158,28 @@ function CuponsTable() {
     {
       title: "User Type",
       dataIndex: "UserType",
+      filters: [
+        {
+          text: "BOTH",
+          value: "BOTH",
+        },
+        {
+          text: "REPEAT",
+          value: "REPEAT",
+        },
+        {
+          text: "FIRST TIME",
+          value: "FIRST_TIME",
+        },
+      ],
+      filterIcon: () => (
+        <Filter
+          size={18}
+          color="#1B70A6"
+          className="flex items-start justify-start"
+        />
+      ),
+      onFilter: (value, record) => record.UserType.indexOf(value) === 0,
       render: (text) => (
         <Tag
           color={text === "First Time" ? "green" : "orange"}
@@ -230,12 +281,43 @@ function CuponsTable() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <div className="w-1/3">
+        <div className="flex w-1/2 gap-4">
           <Input
             placeholder="Search coupons"
             prefix={<Search className="mr-2 text-black" size={20} />}
             className="h-11 !rounded-lg !border !text-base"
             onChange={(e) => handleSearch(e.target.value)}
+          />
+
+          <Select
+            showSearch
+            style={{ width: "100%" }}
+            placeholder="Select countries"
+            className="h-11 !rounded-lg !border !text-base"
+            options={countryOptions}
+            value={selectedCountry}
+            onChange={(value) => {
+              setSelectedCountry(value);
+            }}
+            filterOption={(input, option) =>
+              option?.label?.toLowerCase().includes(input.toLowerCase())
+            }
+            allowClear
+          />
+          <Select
+            showSearch
+            style={{ width: "100%" }}
+            placeholder="Select stores"
+            className="h-11 !rounded-lg !border !text-base"
+            options={storeOptions}
+            value={selectedStore}
+            onChange={(value) => {
+              setSelectedStore(value);
+            }}
+            filterOption={(input, option) =>
+              option?.label?.toLowerCase().includes(input.toLowerCase())
+            }
+            allowClear
           />
         </div>
         <Button
