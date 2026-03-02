@@ -1,24 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { Modal, Button, Divider, Form } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Modal, Button, Divider, Form, Upload } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
 import toast from "react-hot-toast";
-
+import { UploadOutlined } from "@ant-design/icons";
 import FormWrapper from "@/components/Form/FormWrapper";
 import USelect from "@/components/Form/USelect";
-import UUpload from "@/components/Form/UUpload";
 
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
-import { useAddPopUpMutation } from "@/redux/api/popupAPi";
+import { useUpdatePopUpMutation } from "@/redux/api/popupAPi";
 import UInput from "@/components/Form/UInput";
+import countries from "world-countries";
 
 const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
+  const [uploadedThumbnail, setUploadedThumbnail] = useState([]);
+  const [uploadedArabicThumbnail, setUploadedArabicThumbnail] = useState([]);
 
+  useEffect(() => {
+    if (selectedBanner?.image) {
+      setUploadedThumbnail([
+        {
+          uid: "-1",
+          name: "thumbnail.png",
+          status: "done",
+          url: selectedBanner?.image,
+        },
+      ]);
+    }
+
+    if (selectedBanner?.arabicImage) {
+      setUploadedArabicThumbnail([
+        {
+          uid: "-2",
+          name: "arabic-thumbnail.png",
+          status: "done",
+          url: selectedBanner?.arabicImage,
+        },
+      ]);
+    }
+  }, [selectedBanner]);
   // ================= Store API =================
   const { data: storeData, isLoading: storeLoading } = useGetAllStoresQuery({
     limit: 1000000,
@@ -38,39 +63,55 @@ const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
       { skip: !selectedStore },
     );
 
-  // ---------------- Add Thumbnail API ----------------
-  const [addThumbnail, { isLoading: isAddThumbnailLoading }] =
-    useAddPopUpMutation();
+  const countryOptions = useMemo(() => {
+    return countries.map((c) => ({
+      label: c.name.common, // Full country name (Bangladesh, United States, etc.)
+      value: c.cca2, // ISO code (BD, US)
+    }));
+  }, []);
+
+  // ---------------- edit Thumbnail API ----------------
+  const [updateThumbnail, { isLoading }] = useUpdatePopUpMutation();
 
   // ---------------- Handle Submit ----------------
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { reset }) => {
     try {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(values));
 
-      // English Thumbnail
-      if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
-        formData.append("image", values.thumbnail[0].originFileObj);
+      if (
+        uploadedThumbnail?.length > 0 &&
+        uploadedThumbnail[0]?.originFileObj
+      ) {
+        formData.append("image", uploadedThumbnail[0].originFileObj);
+      }
+      if (
+        uploadedArabicThumbnail?.length > 0 &&
+        uploadedArabicThumbnail[0]?.originFileObj
+      ) {
+        formData.append(
+          "arabicImage",
+          uploadedArabicThumbnail[0].originFileObj,
+        );
       }
 
-      // Arabic Thumbnail
-      // if (
-      //   values.arabicThumbnail?.length > 0 &&
-      //   values.arabicThumbnail[0]?.originFileObj
-      // ) {
-      //   formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
-      // }
-
-      const res = await addThumbnail(formData).unwrap();
+      const res = await updateThumbnail({
+        id: selectedBanner._id,
+        formData,
+      }).unwrap();
 
       if (res?.success) {
-        toast.success(res?.message || "Pop Up added successfully");
+        toast.success(res?.message || "Pop Up updated successfully");
         form.resetFields();
+        setUploadedThumbnail([]);
+        setUploadedArabicThumbnail([]);
+        setSelectedStore(null);
         setOpen(false);
+        reset();
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error?.data?.message || "Failed to add Pop Up");
+      toast.error(error?.data?.message || "Failed to update Pop Up");
     }
   };
 
@@ -110,6 +151,11 @@ const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
           onSubmit={handleSubmit}
           defaultValues={{
             title: selectedBanner?.title,
+            arabicTitle: selectedBanner?.arabicTitle,
+            store: selectedBanner?.coupon?.store?._id,
+            coupon: selectedBanner?.coupon?._id,
+            countries: selectedBanner?.countries,
+            status: selectedBanner?.status,
           }}
         >
           <UInput
@@ -117,6 +163,12 @@ const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
             label="Title"
             placeholder="Enter Title"
             required
+          />
+          <UInput
+            name="arabicTitle"
+            label="العنوان (Arabic)"
+            placeholder="أدخل العنوان"
+            dir="rtl"
           />
           {/* Store Select */}
           <USelect
@@ -136,21 +188,47 @@ const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
               form.setFieldsValue({ coupon: null });
             }}
           />
-          {/* English Thumbnail */}
-          <UUpload
-            name="thumbnail"
-            label="Thumbnail"
-            placeholder="Upload English Thumbnail"
-            required
-          />
-          {/* Arabic Thumbnail
-          <UUpload
-            name="arabicThumbnail"
-            label="الصورة المصغرة (Arabic)"
-            placeholder="قم برفع الصورة المصغرة"
-            required
-            dir="rtl"
-          /> */}
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedThumbnail}
+              onChange={({ fileList }) => setUploadedThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  Upload English Thumbnail
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
+
+          <div className="mb-6 rounded-lg border-2 border-dashed p-6">
+            <Upload
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture"
+              fileList={uploadedArabicThumbnail}
+              onChange={({ fileList }) => setUploadedArabicThumbnail(fileList)}
+            >
+              <div className="flex w-full min-w-[816px] justify-center">
+                <Button icon={<UploadOutlined />} className="mx-auto">
+                  قم برفع الصورة المصغرة
+                </Button>
+              </div>
+            </Upload>
+          </div>
+          <p className="!my-4 text-xs text-gray-500">
+            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
+            2MB
+          </p>
+
           {/* Coupon Select */}
           <USelect
             name="coupon"
@@ -159,24 +237,54 @@ const EditPopUpModal = ({ open, setOpen, selectedBanner }) => {
             disabled={!selectedStore}
             loading={couponLoading}
             options={couponData?.data?.data?.map((item) => ({
-              label: item.title,
+              label: item?.title,
               value: item._id,
             }))}
             showSearch
             optionFilterProp="children"
             onSearch={handleSearch}
+            defaultValue={{
+              label: selectedBanner?.coupon?.title,
+              value: selectedBanner?.coupon?._id,
+            }}
           />
+
           {!selectedStore && (
             <p className="mt-1 text-xs text-gray-400">
               Please select a store to load coupons
             </p>
           )}
+
+          {/* Countries */}
+          <USelect
+            name="countries"
+            mode="multiple"
+            label="Country Name"
+            placeholder="Select country"
+            options={countryOptions}
+            showSearch
+            optionFilterProp="label"
+            filterOption={(input, option) =>
+              option.label.toLowerCase().includes(input.toLowerCase())
+            }
+          />
+          <USelect
+            type="text"
+            name="status"
+            label="Status"
+            required={true}
+            placeholder="Select status"
+            options={[
+              { label: "Active", value: "active" },
+              { label: "Inactive", value: "inactive" },
+            ]}
+          />
           <Button
             htmlType="submit"
             className="mt-4 w-full"
             size="large"
             type="primary"
-            loading={isAddThumbnailLoading}
+            loading={isLoading}
             style={{
               background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
             }}

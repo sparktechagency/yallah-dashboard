@@ -17,10 +17,19 @@ const PopUpApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["PopUps"],
     }),
+    // Delete banner
     deletePopUp: builder.mutation({
-      query: (id) => ({
-        url: `/popups/${id}`,
+      query: (thumbnailId) => ({
+        url: `/popups/${thumbnailId}`,
         method: "DELETE",
+      }),
+      invalidatesTags: ["PopUps"],
+    }),
+    updatePopUp: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/popups/${id}`,
+        method: "PATCH",
+        body: formData,
       }),
       invalidatesTags: ["PopUps"],
     }),
@@ -31,4 +40,5 @@ export const {
   useGetPopUpsQuery,
   useAddPopUpMutation,
   useDeletePopUpMutation,
+  useUpdatePopUpMutation,
 } = PopUpApi;

@@ -22,7 +22,7 @@ const ThumbnailContainer = () => {
             background: "linear-gradient(80deg, #FF9D53 0%, #CD5EA7 100%)",
           }}
         >
-          Add Popup Banner
+          Add Popup
         </Button>
       </div>
 

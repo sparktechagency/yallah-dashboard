@@ -1,25 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Modal, Button, Divider, Form, Upload } from "antd";
 import { RiCloseLargeLine } from "react-icons/ri";
 import toast from "react-hot-toast";
-
 import FormWrapper from "@/components/Form/FormWrapper";
 import USelect from "@/components/Form/USelect";
-import UUpload from "@/components/Form/UUpload";
-
 import { useGetAllStoresQuery } from "@/redux/api/storeApi";
 import { useGetCouponsByStoreIdQuery } from "@/redux/api/couponApi";
 import { useAddPopUpMutation } from "@/redux/api/popupAPi";
 import UInput from "@/components/Form/UInput";
 import { UploadOutlined } from "@ant-design/icons";
+import countries from "world-countries";
 
 const AddPopUpModal = ({ open, setOpen }) => {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
-
   const [uploadedThumbnail, setUploadedThumbnail] = useState([]);
   const [uploadedArabicThumbnail, setUploadedArabicThumbnail] = useState([]);
 
@@ -42,28 +39,22 @@ const AddPopUpModal = ({ open, setOpen }) => {
       { skip: !selectedStore },
     );
 
+  const countryOptions = useMemo(() => {
+    return countries.map((c) => ({
+      label: c.name.common, // Full country name (Bangladesh, United States, etc.)
+      value: c.cca2, // ISO code (BD, US)
+    }));
+  }, []);
+
   // ---------------- Add Thumbnail API ----------------
   const [addThumbnail, { isLoading: isAddThumbnailLoading }] =
     useAddPopUpMutation();
 
   // ---------------- Handle Submit ----------------
-  const handleSubmit = async (values, {reset}) => {
+  const handleSubmit = async (values, { reset }) => {
     try {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(values));
-
-      // // English Thumbnail
-      // if (values.thumbnail?.length > 0 && values.thumbnail[0]?.originFileObj) {
-      //   formData.append("image", values.thumbnail[0].originFileObj);
-      // }
-
-      // // Arabic Thumbnail
-      // if (
-      //   values.arabicThumbnail?.length > 0 &&
-      //   values.arabicThumbnail[0]?.originFileObj
-      // ) {
-      //   formData.append("arabicImage", values.arabicThumbnail[0].originFileObj);
-      // }
 
       if (
         uploadedThumbnail?.length > 0 &&
@@ -75,7 +66,10 @@ const AddPopUpModal = ({ open, setOpen }) => {
         uploadedArabicThumbnail?.length > 0 &&
         uploadedArabicThumbnail[0]?.originFileObj
       ) {
-        formData.append("arabicImage", uploadedArabicThumbnail[0].originFileObj);
+        formData.append(
+          "arabicImage",
+          uploadedArabicThumbnail[0].originFileObj,
+        );
       }
 
       const res = await addThumbnail(formData).unwrap();
@@ -141,7 +135,7 @@ const AddPopUpModal = ({ open, setOpen }) => {
             name="store"
             label="Store"
             placeholder="Select Store"
-            loading={storeLoading}
+            // loading={storeLoading}
             options={storeData?.data?.data?.map((item) => ({
               label: item.name,
               value: item._id,
@@ -154,30 +148,6 @@ const AddPopUpModal = ({ open, setOpen }) => {
               form.setFieldsValue({ coupon: null });
             }}
           />
-
-          {/* English Thumbnail */}
-          {/* <UUpload
-            name="thumbnail"
-            label="Thumbnail"
-            placeholder="Upload English Thumbnail"
-            required
-          />
-          <p className="!my-4 text-xs text-gray-500">
-            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
-            2MB
-          </p> */}
-          {/* Arabic Thumbnail */}
-          {/* <UUpload
-            name="arabicThumbnail"
-            label="الصورة المصغرة (Arabic)"
-            placeholder="قم برفع الصورة المصغرة"
-            required
-            dir="rtl"
-          />
-          <p className="!my-4 text-xs text-gray-500">
-            Image format: JPG / PNG | Recommended size: 1200×675px | Max size:
-            2MB
-          </p> */}
 
           <div className="mb-6 rounded-lg border-2 border-dashed p-6">
             <Upload
@@ -240,6 +210,31 @@ const AddPopUpModal = ({ open, setOpen }) => {
               Please select a store to load coupons
             </p>
           )}
+
+          {/* Countries */}
+          <USelect
+            name="countries"
+            mode="multiple"
+            label="Country Name"
+            placeholder="Select country"
+            options={countryOptions}
+            showSearch
+            optionFilterProp="label"
+            filterOption={(input, option) =>
+              option.label.toLowerCase().includes(input.toLowerCase())
+            }
+          />
+          <USelect
+            type="text"
+            name="status"
+            label="Status"
+            required={true}
+            placeholder="Select status"
+            options={[
+              { label: "Active", value: "active" },
+              { label: "Inactive", value: "inactive" },
+            ]}
+          />
 
           <Button
             htmlType="submit"

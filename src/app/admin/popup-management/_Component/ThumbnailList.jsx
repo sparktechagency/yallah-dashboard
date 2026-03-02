@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { EyeIcon, PencilIcon, TrashIcon } from "lucide-react";
 import {
   useDeletethumbnailsMutation,
@@ -10,8 +9,12 @@ import { useState } from "react";
 import EditthumbnailModal from "../../addbanner/_Component/EditthumbnailModal";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import toast from "react-hot-toast";
-import { useGetPopUpsQuery } from "@/redux/api/popupAPi";
+import {
+  useDeletePopUpMutation,
+  useGetPopUpsQuery,
+} from "@/redux/api/popupAPi";
 import EditPopUpModal from "./EditPopup";
+import { Image } from "antd";
 
 function ThumbnailList() {
   const [open, setOpen] = useState(false);
@@ -25,7 +28,7 @@ function ThumbnailList() {
 
   // Delete thumbnail from API
   const [deleteThumbnail, { isLoading: isDeleteLoading }] =
-    useDeletethumbnailsMutation();
+    useDeletePopUpMutation();
 
   // Placeholder handlers for Edit and Delete (replace with your logic)
 
@@ -62,9 +65,7 @@ function ThumbnailList() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="mb-6 text-2xl font-bold text-gray-800">
-        Popup Thumbnails
-      </h2>
+      <h2 className="mb-6 text-2xl font-bold text-gray-800">Popup Banner</h2>
 
       {/* Responsive Grid: 1 col on mobile, 2 on tablet, 3 on desktop */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -75,24 +76,31 @@ function ThumbnailList() {
           >
             {/* Thumbnail Image */}
             <div className="relative h-48 w-full">
-              <Image
-                src={thumbnail?.image}
-                layout="fill"
-                alt={`Banner for ${thumbnail.coupon?.title || "Coupon"}`}
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  e.target.src = "/fallback-image.jpg"; // Optional: Fallback image URL
-                }}
-              />
-              {/* Optional: Overlay icon for "view" feel */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 transition-opacity duration-300 hover:bg-opacity-20 hover:opacity-100">
-                <EyeIcon className="h-8 w-8 text-white" />
+              <div className="flex h-full items-center justify-center gap-5">
+                <Image
+                  src={thumbnail?.image}
+                  layout="fill"
+                  alt={`Banner for ${thumbnail.coupon?.title || "Coupon"}`}
+                  className="!h-20 w-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "/fallback-image.jpg";
+                  }}
+                />
+                <Image
+                  src={thumbnail?.arabicImage}
+                  layout="fill"
+                  alt={`Banner for ${thumbnail.coupon?.title || "Coupon"}`}
+                  className="!h-20 w-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "/fallback-image.jpg";
+                  }}
+                />
               </div>
             </div>
 
             {/* Coupon Details */}
             <div className="p-4">
-              <h3 className="mb-1 text-lg font-semibold text-gray-800">
+              <h3 className="mb-1 mt-2 text-lg font-semibold text-gray-800">
                 {thumbnail?.title || "Untitled Banner"}
               </h3>
               <h3 className="mb-1 text-lg font-semibold text-gray-800">
@@ -107,7 +115,7 @@ function ThumbnailList() {
             </div>
 
             {/* Action Buttons */}
-            {/* <div className="flex justify-end space-x-2 px-4 pb-4">
+            <div className="flex justify-end space-x-2 px-4 pb-4">
               <button
                 onClick={() => {
                   setSelectedThumbnail(thumbnail);
@@ -127,7 +135,7 @@ function ThumbnailList() {
                   Delete
                 </button>
               </CustomConfirm>
-            </div> */}
+            </div>
           </div>
         ))}
       </div>
